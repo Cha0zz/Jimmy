@@ -299,7 +299,7 @@ def textwatch():
     if text.lower().find(botnick.lower()) != -1:  # respond with bot info
         if text.lower().find("who is") != -1 or text.lower().find("who are you") != -1:
             sendmsg("I'm " + botnick +
-                    " and I'm a bot made by Cha0zz.")
+                    " and I'm a bot made by Cha0zz. | https://github.com/Cha0zz/Jimmy")
             sendmsg("Use !help for a list of available commands.")
 
     if text.lower().find(botnick.lower()) != -1 and text.find("why") != -1:  # shrug
