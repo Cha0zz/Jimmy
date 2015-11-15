@@ -903,13 +903,6 @@ def bot():
         if connected is False:
             irc.send("JOIN " + channel + "\r\n")
 
-        #if len(user_text) == 0:
-            #user_text = str(raw_input("Text"))
-            #time.sleep(0.5)
-
-        #if len(user_text) > 0:
-            #sendmsg(user_text)
-            #user_text = ""
 
         if sleep is False and override is False:
             changenick()
