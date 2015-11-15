@@ -25,9 +25,10 @@ import lxml
 from lxml import etree
 import pywapi
 import urbandict
+import time
 
 server = "burstfire.uk.eu.gamesurge.net"  # settingss
-channel = "#limittheory"
+channel = "#talstest"
 botnick = "Jimmy42"
 
 # defines the socket
@@ -89,11 +90,12 @@ music = ["https://www.youtube.com/watch?v=dQw4w9WgXcQ", "https://www.youtube.com
          "https://www.youtube.com/watch?v=Z_DhNLCyVss", "https://www.youtube.com/watch?v=1GKXaC4SrF8", "https://www.youtube.com/watch?v=ihTABU6t8IU", "https://www.youtube.com/watch?v=VnT7pT6zCcA&feature=youtu.be", "https://www.youtube.com/watch?v=zNcsBf2GCFc", "https://youtu.be/EAtBki0PsC0", "https://www.youtube.com/watch?v=pYb8ux67W2E", "https://www.youtube.com/watch?v=7ztvgT4aV-8", "https://www.youtube.com/watch?v=iC65ufGUvKM", "https://www.youtube.com/watch?v=XAg5KjnAhuU", "https://www.youtube.com/watch?v=3vC5TsSyNjU"]
 
 
-def sendmsg(msg):
+def sendmsg(msg, channel = ""):
     """
     This function is responsible for sending messages to the IRC stream
     """
-    channel = text.split()[2]
+    if channel == "":
+        channel = text.split()[2]
     irc.send("PRIVMSG " + channel + " :" + msg + "\n")
 
 
@@ -132,17 +134,20 @@ def wakewatch():
         sendmsg("I will resume cheering and waving!")
 
 
-def changechannel():
+def changechannel(channel = ""):
     """
     This function allows the bot to join and leave new channels
     """
-    if ":!join" in text:  # join a new channel
-        chan = text.split()[4]
-        irc.send("JOIN " + chan + "\r\n")
-        sendmsg('I joined the channel ' + chan)
-    if ":!leave" in text:  # leave a channel
-        chan = text.split()[4]
-        irc.send("PART " + chan + "\r\n")
+    if channel != "":
+        irc.send("JOIN " + channel + "\r\n")
+    else:
+        if ":!join" in text:  # join a new channel
+            chan = text.split()[4]
+            irc.send("JOIN " + chan + "\r\n")
+            sendmsg('I joined the channel ' + chan)
+        if ":!leave" in text:  # leave a channel
+            chan = text.split()[4]
+            irc.send("PART " + chan + "\r\n")
 
 
 def changenick(nick="False"):
@@ -882,36 +887,60 @@ def urban():
             sendmsg(definition)
         except:
             sendmsg("BROKEN!!!!")
+def bot():
+    while 1:  # puts it in a loop
+        global text
+        #user_text = ""
+        text = irc.recv(4096)  # receive the text
+        print(text)  # print text to console
 
-while 1:  # puts it in a loop
-    global text
-    text = irc.recv(4096)  # receive the text
-    print(text)  # print text to console
+        if text.find('PING') != -1:  # check if 'PING' is found
+            # returnes 'PONG' back to the server
+            # (prevents pinging out!)
+            irc.send('PONG ' + text.split()
+                     [1] + '\r\n')
 
-    if text.find('PING') != -1:  # check if 'PING' is found
-        # returnes 'PONG' back to the server
-        # (prevents pinging out!)
-        irc.send('PONG ' + text.split()
-                 [1] + '\r\n')
+        if connected is False:
+            irc.send("JOIN " + channel + "\r\n")
 
-    if connected is False:
-        irc.send("JOIN " + channel + "\r\n")
+        #if len(user_text) == 0:
+            #user_text = str(raw_input("Text"))
+            #time.sleep(0.5)
 
-    if sleep is False and override is False:
-        changenick()
-        textwatch()
-        helpwatch()
-        greetingwatch()
-        changechannel()
-        sleepwatch()
-        musicwatch()
-        wikiwatch()
-        googlewatch()
-        dicewatch()
-        pm()
-        REKT()
-        weather()
-        urban()
-    wakewatch()
-    quitwatch()
-    overridewatch()
+        #if len(user_text) > 0:
+            #sendmsg(user_text)
+            #user_text = ""
+
+        if sleep is False and override is False:
+            changenick()
+            textwatch()
+            helpwatch()
+            greetingwatch()
+            changechannel()
+            sleepwatch()
+            musicwatch()
+            wikiwatch()
+            googlewatch()
+            dicewatch()
+            pm()
+            REKT()
+            weather()
+            urban()
+        wakewatch()
+        quitwatch()
+        overridewatch()
+
+thread.start_new_thread(bot,())
+
+while 1:
+    global channel
+    user_text = str(raw_input(""))
+    if user_text.find("/channel") != -1:
+        channel = user_text.split()[1]
+    elif user_text.find("/join") != -1:
+        chan = user_text.split()[1]
+        changechannel(chan)
+    elif user_text.find("/quit") != -1:
+        irc.send("QUIT" + "\n")
+    else:
+        sendmsg(user_text, channel)
