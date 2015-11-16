@@ -48,6 +48,7 @@ override = False
 cheercount = 0
 hailcount = 0
 wavecount = 0
+error = "Something went wrong."
 
 
 f = open('/users/jasperdelaey/documents/workspace/bot/savefile', 'rb')
@@ -98,6 +99,13 @@ def sendmsg(msg, channel=""):
         channel = text.split()[2]
     irc.send("PRIVMSG " + channel + " :" + msg + "\n")
 
+def action(msg, channel=""):
+    """
+    This function sends an action
+    """
+    if channel == "":
+        channel = text.split()[2]
+    sendmsg("\001ACTION" + msg+ "\001")
 
 def sendpm(name, msg):
     """
@@ -698,7 +706,7 @@ def wikiwatch():
             sendmsg(
                 "I'm not sure what you mean, this is what I could find. | " + url)
         except:
-            sendmsg("Something went wrong.")
+            sendmsg(error)
 
 
 def googlewatch():
@@ -721,47 +729,48 @@ def googlewatch():
             if url.find("watch%") != -1:  # circumvent google bot detection
                 url = url.replace("watch%3Fv%3D", "watch?v=")
             sendmsg(title.encode('utf-8', 'ignore') + " | " + url)
-
     except:
-        sendmsg("Something went wrong.")
+        sendmsg(error)
+    try:
+        if text.find("!image") != -1 or text.find("!img") != -1:  # search google images
+            search_list = text.split()[4:]
+            if "x2" in search_list:
+                search_list.remove("x2")
+            if "x3" in search_list:
+                search_list.remove("x3")
+            search = " ".join(search_list)
+            search_query = urllib.urlencode({'q': search})
+            response = urllib2.urlopen(
+                "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&" + search_query).read()
+            data = json.loads(response)
+            results = data['responseData']['results']
+            result1 = results[0]
+            result2 = results[1]
+            result3 = results[2]
+            title1 = result1['title'].replace(
+                "<b>", "").replace("</b>", "")
+            title2 = result2['title'].replace(
+                "<b>", "").replace("</b>", "")
+            title3 = result3['title'].replace(
+                "<b>", "").replace("</b>", "")
+            url1 = result1['url']
+            url2 = result2['url']
+            url3 = result3['url']
+            # title_filtered = ''.join(
+            # filter(lambda x: x in string.printable, title))
+            if "x3" in text:
+                sendmsg(url1.encode('utf-8', 'ignore') +
+                        " | " + url2.encode('utf-8', 'ignore') + " | " + url3.encode('utf-8', 'ignore'))
 
-    if text.find("!image") != -1 or text.find("!img") != -1:  # search google images
-        search_list = text.split()[4:]
-        if "x2" in search_list:
-            search_list.remove("x2")
-        if "x3" in search_list:
-            search_list.remove("x3")
-        search = " ".join(search_list)
-        search_query = urllib.urlencode({'q': search})
-        response = urllib2.urlopen(
-            "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&" + search_query).read()
-        data = json.loads(response)
-        results = data['responseData']['results']
-        result1 = results[0]
-        result2 = results[1]
-        result3 = results[2]
-        title1 = result1['title'].replace(
-            "<b>", "").replace("</b>", "")
-        title2 = result2['title'].replace(
-            "<b>", "").replace("</b>", "")
-        title3 = result3['title'].replace(
-            "<b>", "").replace("</b>", "")
-        url1 = result1['url']
-        url2 = result2['url']
-        url3 = result3['url']
-        # title_filtered = ''.join(
-        # filter(lambda x: x in string.printable, title))
-        if "x3" in text:
-            sendmsg(url1.encode('utf-8', 'ignore') +
-                    " | " + url2.encode('utf-8', 'ignore') + " | " + url3.encode('utf-8', 'ignore'))
+            elif "x2" in text:
+                sendmsg(url1.encode('utf-8', 'ignore') +
+                        " | " + url2.encode('utf-8', 'ignore'))
 
-        elif "x2" in text:
-            sendmsg(url1.encode('utf-8', 'ignore') +
-                    " | " + url2.encode('utf-8', 'ignore'))
-
-        else:
-            sendmsg(title1.encode('utf-8', 'ignore') +
-                    " | " + url1.encode('utf-8', 'ignore'))
+            else:
+                sendmsg(title1.encode('utf-8', 'ignore') +
+                        " | " + url1.encode('utf-8', 'ignore'))
+    except:
+        sendmsg(error)
 
 
 def dicewatch():  # !roll 5d10
@@ -949,5 +958,8 @@ while 1:
         changechannel(chan)
     elif user_text.find("/quit") != -1:
         irc.send("QUIT" + "\n")
+    elif user_text.find("/me") != -1:
+        msg = " ".join(user_text.split()[1:])
+        sendmsg("\001ACTION " + msg + "\001", channel)
     else:
         sendmsg(user_text, channel)
