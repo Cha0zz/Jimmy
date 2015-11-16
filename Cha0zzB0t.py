@@ -28,7 +28,7 @@ import urbandict
 import time
 
 server = "burstfire.uk.eu.gamesurge.net"  # settingss
-channel = "#talstest"
+channel = "#limittheory"
 botnick = "Jimmy42"
 
 # defines the socket
@@ -90,7 +90,7 @@ music = ["https://www.youtube.com/watch?v=dQw4w9WgXcQ", "https://www.youtube.com
          "https://www.youtube.com/watch?v=Z_DhNLCyVss", "https://www.youtube.com/watch?v=1GKXaC4SrF8", "https://www.youtube.com/watch?v=ihTABU6t8IU", "https://www.youtube.com/watch?v=VnT7pT6zCcA&feature=youtu.be", "https://www.youtube.com/watch?v=zNcsBf2GCFc", "https://youtu.be/EAtBki0PsC0", "https://www.youtube.com/watch?v=pYb8ux67W2E", "https://www.youtube.com/watch?v=7ztvgT4aV-8", "https://www.youtube.com/watch?v=iC65ufGUvKM", "https://www.youtube.com/watch?v=XAg5KjnAhuU", "https://www.youtube.com/watch?v=3vC5TsSyNjU"]
 
 
-def sendmsg(msg, channel = ""):
+def sendmsg(msg, channel=""):
     """
     This function is responsible for sending messages to the IRC stream
     """
@@ -134,7 +134,7 @@ def wakewatch():
         sendmsg("I will resume cheering and waving!")
 
 
-def changechannel(channel = ""):
+def changechannel(channel=""):
     """
     This function allows the bot to join and leave new channels
     """
@@ -387,8 +387,9 @@ def textwatch():
     if text.lower().find("idiot") != -1:
         sendmsg("Idiots, idiots everywhere.")
 
-    if text.lower().find("what is the meaning of life") !=-1 or text.lower().find("what's the meaning of life") != -1:
+    if text.lower().find("what is the meaning of life") != -1 or text.lower().find("what's the meaning of life") != -1:
         sendmsg("42")
+
 
 def helpwatch():
     """
@@ -629,21 +630,26 @@ def musicwatch():
         sendmsg(video_title + " | " + link)
 
     if text.find("!youtube") != -1 or text.find("!yt") != -1 or text.find("!video") != -1:  # searches youtube
-        result_list = []
-        search_list = text.split()[4:]
-        search = " ".join(search_list)
-        search_query = urllib.urlencode({"search_query": search})
-        url = "http://www.youtube.com/results?" + search_query
-        response = urllib2.urlopen(url)
-        html = response.read()
-        soup = BeautifulSoup(html)
-        for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
-            result_list.append("http://www.youtube.com" + vid['href'])
-        link = result_list[0]
-        youtube = etree.HTML(urllib.urlopen(link).read())
-        video_title = " ".join(youtube.xpath(
-            "//span[@id='eow-title']/@title"))
-        sendmsg(video_title + " | " + link)
+        try:
+            result_list = []
+            search_list = text.split()[4:]
+            search = " ".join(search_list)
+            search_query = urllib.urlencode({"search_query": search})
+            url = "http://www.youtube.com/results?" + search_query
+            response = urllib2.urlopen(url)
+            html = response.read()
+            soup = BeautifulSoup(html)
+            for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
+                result_list.append(
+                    "http://www.youtube.com" + vid['href'])
+            link = result_list[0]
+            youtube = etree.HTML(urllib.urlopen(link).read())
+            video_title = " ".join(youtube.xpath(
+                "//span[@id='eow-title']/@title"))
+            sendmsg(video_title.encode('utf-8', 'ignore') +
+                    " | " + link.encode('utf-8', 'ignore'))
+        except:
+            sendmsg("Something went wrong.")
 
 """
     if "!plist" in text:  # send a list of all the music in the personal library
@@ -887,7 +893,12 @@ def urban():
             sendmsg(definition)
         except:
             sendmsg("BROKEN!!!!")
+
+
 def bot():
+    """
+    stuff handled by the bot
+    """
     while 1:  # puts it in a loop
         global text
         #user_text = ""
@@ -902,7 +913,6 @@ def bot():
 
         if connected is False:
             irc.send("JOIN " + channel + "\r\n")
-
 
         if sleep is False and override is False:
             changenick()
@@ -923,9 +933,13 @@ def bot():
         quitwatch()
         overridewatch()
 
-thread.start_new_thread(bot,())
+# put the listener/ bot in his own thread
+thread.start_new_thread(bot, ())
 
 while 1:
+    """
+    Stuff to send messages/ do stuff from the command line.
+    """
     global channel
     user_text = str(raw_input(""))
     if user_text.find("/channel") != -1:
