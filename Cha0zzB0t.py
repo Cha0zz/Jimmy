@@ -67,7 +67,7 @@ nopelist = ["KungCheops"]
 
 commands = ["!nick", "!quit", "!help", "!join", "!leave", "!sleep", "!wake", "!work", "!bed", "!choose", "!no",
             "!update", "!corn_on", "!corn_off", "!countdown", "!sing", "!music", "!add", "!remove", "!songcount", "!psongcount", "!youtube", "!wiki", "!google", "!padd", "!premove", "!pmusic", "!image", "!roll", "!plist", "!moon", "!weather",
-            "!urban"]  # list of available commands
+            "!urban", "!dict"]  # list of available commands
 
 greetings = ["Hi", "Hello", "Hey", "Greetings",
              "Heyaa", "Howdy"]  # list of greetings
@@ -105,7 +105,7 @@ def action(msg, channel=""):
     """
     if channel == "":
         channel = text.split()[2]
-    sendmsg("\001ACTION" + msg+ "\001")
+    sendmsg("\001ACTION " + msg+ "\001")
 
 def sendpm(name, msg):
     """
@@ -485,6 +485,8 @@ def helpwatch():
                 "Gives the weather for a location | !weather <location>")
         elif "urban" in text:
             sendmsg("Searches the urban dictionairy | !urban <query>")
+        elif "dict" in text:
+            sendmsg("Searches a dictionairy for a definition | !dict <query>")
         else:
             sendmsg(
                 "The available commands are " + commands_str)
@@ -903,6 +905,15 @@ def urban():
         except:
             sendmsg("BROKEN!!!!")
 
+def lookup():
+    if text.find("!dict") !=-1:
+        try:
+            search = " ".join(text.split()[4:])
+            search_query = urllib.urlencode({'term': search})
+            url = "http://www.dictionary.com/cgi-bin/dict.pl?" + search_query
+            sendmsg("This is what I could find | " + url)
+        except:
+            sendmsg(error)
 
 def bot():
     """
@@ -917,6 +928,10 @@ def bot():
         if text.find('PING') != -1:  # check if 'PING' is found
             # returnes 'PONG' back to the server
             # (prevents pinging out!)
+            irc.send('PONG ' + text.split()
+                     [1] + '\r\n')
+
+        if text.lower().find("to connect, type") !=-1:
             irc.send('PONG ' + text.split()
                      [1] + '\r\n')
 
@@ -938,6 +953,7 @@ def bot():
             REKT()
             weather()
             urban()
+            lookup()
         wakewatch()
         quitwatch()
         overridewatch()
@@ -960,6 +976,6 @@ while 1:
         irc.send("QUIT" + "\n")
     elif user_text.find("/me") != -1:
         msg = " ".join(user_text.split()[1:])
-        sendmsg("\001ACTION " + msg + "\001", channel)
+        action(msg, channel)
     else:
         sendmsg(user_text, channel)
