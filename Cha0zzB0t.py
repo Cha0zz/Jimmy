@@ -707,8 +707,7 @@ def wikiwatch():
             lookup = wikipedia.search(search, results=5)
             # page = wikipedia.page(lookup[0])
             # title = page.title
-            url = "https://en.wikipedia.org/wiki/" + \
-                urllib.urlencode({"": lookup[0]})
+            url = "https://en.wikipedia.org/wiki/" + lookup[0].replace(" ", "+")
             sendmsg(
                 "I'm not sure what you mean, this is what I could find. | " + url)
         except:
