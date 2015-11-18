@@ -99,13 +99,15 @@ def sendmsg(msg, channel=""):
         channel = text.split()[2]
     irc.send("PRIVMSG " + channel + " :" + msg + "\n")
 
+
 def action(msg, channel=""):
     """
     This function sends an action
     """
     if channel == "":
         channel = text.split()[2]
-    sendmsg("\001ACTION " + msg+ "\001")
+    sendmsg("\001ACTION " + msg + "\001")
+
 
 def sendpm(name, msg):
     """
@@ -240,7 +242,7 @@ def textwatch():
     if text.lower().find(botnick.lower() + "?") != -1:
         sendmsg(random.choice(sentences))
 
-    if text.lower().find(botnick.lower()) != -1 and text.find("tell") != -1:  # make the bot tell things
+    if text.lower().find(botnick.lower()) != -1 and text.find("tell") != -1 and text.find("telling") == -1:  # make the bot tell things
         name1 = text.split()[5]
         message_list = text.split()[6:]
         message = " ".join(message_list)
@@ -486,7 +488,8 @@ def helpwatch():
         elif "urban" in text:
             sendmsg("Searches the urban dictionairy | !urban <query>")
         elif "dict" in text:
-            sendmsg("Searches a dictionairy for a definition | !dict <query>")
+            sendmsg(
+                "Searches a dictionairy for a definition | !dict <query>")
         else:
             sendmsg(
                 "The available commands are " + commands_str)
@@ -704,7 +707,8 @@ def wikiwatch():
             lookup = wikipedia.search(search, results=5)
             # page = wikipedia.page(lookup[0])
             # title = page.title
-            url = "https://en.wikipedia.org/wiki/" + lookup[0]
+            url = "https://en.wikipedia.org/wiki/" + \
+                urllib.urlencode({"": lookup[0]})
             sendmsg(
                 "I'm not sure what you mean, this is what I could find. | " + url)
         except:
@@ -905,8 +909,9 @@ def urban():
         except:
             sendmsg("BROKEN!!!!")
 
+
 def lookup():
-    if text.find("!dict") !=-1:
+    if text.find("!dict") != -1:
         try:
             search = " ".join(text.split()[4:])
             search_query = urllib.urlencode({'term': search})
@@ -914,6 +919,7 @@ def lookup():
             sendmsg("This is what I could find | " + url)
         except:
             sendmsg(error)
+
 
 def bot():
     """
@@ -931,7 +937,7 @@ def bot():
             irc.send('PONG ' + text.split()
                      [1] + '\r\n')
 
-        if text.lower().find("to connect, type") !=-1:
+        if text.lower().find("to connect, type") != -1:
             irc.send('PONG ' + text.split()
                      [1] + '\r\n')
 
