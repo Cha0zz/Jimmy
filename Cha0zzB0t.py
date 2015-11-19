@@ -293,9 +293,7 @@ def textwatch():
     if text.lower().find("!work") != -1:  # BACK TO WORK
         original_nick = botnick
         changenick("RedHotBalrog")
-        sendmsg("BACK TO WORK!")
-        sendmsg(
-            "http://wowimg.zamimg.com/hearthhead/sounds/VO_EX1_603_Play_01.mp3")
+        sendmsg("BACK TO WORK! | http://wowimg.zamimg.com/hearthhead/sounds/VO_EX1_603_Play_01.mp3")
         sendmsg("\001ACTION cracks whip \001")
         changenick(original_nick)
 
@@ -915,7 +913,16 @@ def lookup():
             search = " ".join(text.split()[4:])
             search_query = urllib.urlencode({'term': search})
             url = "http://www.dictionary.com/cgi-bin/dict.pl?" + search_query
+            response = urllib2.urlopen(url).read()
+            start = int(response.find('<div class="def-content">')) + 25
+            #start_part = response[start+25:]
+            end = int(response.find("</div>", start))
+            definition = response[start:end].replace("\n","")
+            definition = re.sub('\<.*?\>', '', definition)
+            if len(definition) > 430:
+                definition = definition[0:430] + "..."
             sendmsg("This is what I could find | " + url)
+            sendmsg(definition)
         except:
             sendmsg(error)
 
