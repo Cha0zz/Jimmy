@@ -18,7 +18,7 @@ from bs4 import BeautifulSoup
 import re
 import wikipedia
 import random
-import string
+#import string
 import json
 import thread
 import lxml
@@ -293,7 +293,8 @@ def textwatch():
     if text.lower().find("!work") != -1:  # BACK TO WORK
         original_nick = botnick
         changenick("RedHotBalrog")
-        sendmsg("BACK TO WORK! | http://wowimg.zamimg.com/hearthhead/sounds/VO_EX1_603_Play_01.mp3")
+        sendmsg(
+            "BACK TO WORK! | http://wowimg.zamimg.com/hearthhead/sounds/VO_EX1_603_Play_01.mp3")
         sendmsg("\001ACTION cracks whip \001")
         changenick(original_nick)
 
@@ -705,7 +706,8 @@ def wikiwatch():
             lookup = wikipedia.search(search, results=5)
             # page = wikipedia.page(lookup[0])
             # title = page.title
-            url = "https://en.wikipedia.org/wiki/" + lookup[0].replace(" ", "+")
+            url = "https://en.wikipedia.org/wiki/" + \
+                lookup[0].replace(" ", "+")
             sendmsg(
                 "I'm not sure what you mean, this is what I could find. | " + url)
         except:
@@ -913,11 +915,13 @@ def lookup():
             search = " ".join(text.split()[4:])
             search_query = urllib.urlencode({'term': search})
             url = "http://www.dictionary.com/cgi-bin/dict.pl?" + search_query
+            #url = "http://www.oxforddictionaries.com/definition/english/" + search
             response = urllib2.urlopen(url).read()
-            start = int(response.find('<div class="def-content">')) + 25
+            start = int(response.find(
+                '<div class="def-content">')) + 25
             #start_part = response[start+25:]
             end = int(response.find("</div>", start))
-            definition = response[start:end].replace("\n","")
+            definition = response[start:end].replace("\n", "")
             definition = re.sub('\<.*?\>', '', definition)
             if len(definition) > 430:
                 definition = definition[0:430] + "..."
@@ -977,7 +981,7 @@ while 1:
     """
     Stuff to send messages/ do stuff from the command line.
     """
-    global channel
+    #global channel
     user_text = str(raw_input(""))
     if user_text.find("/channel") != -1:
         channel = user_text.split()[1]
@@ -989,5 +993,8 @@ while 1:
     elif user_text.find("/me") != -1:
         msg = " ".join(user_text.split()[1:])
         action(msg, channel)
+    elif user_text.find("/nick") != -1:
+        nick = user_text.split()[1]
+        changenick(nick)
     else:
         sendmsg(user_text, channel)
