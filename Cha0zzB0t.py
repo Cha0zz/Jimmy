@@ -351,7 +351,7 @@ def textwatch():
                     text.split()[4])
         try:
             print(message_list)
-            sendmsg(random.choice(message_list))
+            sendmsg(random.choice(message_list).lstrip(" "))
         except:
             sendmsg(
                 'Use "," or "or" to separate the possible choices.')
@@ -925,8 +925,11 @@ def lookup():
             definition = re.sub('\<.*?\>', '', definition)
             if len(definition) > 430:
                 definition = definition[0:430] + "..."
-            sendmsg("This is what I could find | " + url)
-            sendmsg(definition)
+            if "-//W3C//DTD" in definition:
+                sendsmg("I'm not sure what you mean | " + url)
+            else:
+                sendmsg("This is what I could find | " + url)
+                sendmsg(definition)
         except:
             sendmsg(error)
 
