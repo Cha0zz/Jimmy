@@ -18,7 +18,6 @@ from bs4 import BeautifulSoup
 import re
 import wikipedia
 import random
-#import string
 import json
 import thread
 import lxml
@@ -67,7 +66,7 @@ nopelist = ["KungCheops"]
 
 commands = ["!nick", "!quit", "!help", "!join", "!leave", "!sleep", "!wake", "!work", "!bed", "!choose", "!no",
             "!update", "!corn_on", "!corn_off", "!countdown", "!sing", "!music", "!add", "!remove", "!songcount", "!psongcount", "!youtube", "!wiki", "!google", "!padd", "!premove", "!pmusic", "!image", "!roll", "!plist", "!moon", "!weather",
-            "!urban", "!dict"]  # list of available commands
+            "!urban", "!dict", "!identify"]  # list of available commands
 
 greetings = ["Hi", "Hello", "Hey", "Greetings",
              "Heyaa", "Howdy"]  # list of greetings
@@ -97,7 +96,8 @@ def sendmsg(msg, channel=""):
     """
     if channel == "":
         channel = text.split()[2]
-    irc.send("PRIVMSG " + channel + " :" + msg + "\n")
+    irc.send("PRIVMSG " + channel + " :" +
+             msg.encode('utf-8', 'ignore') + "\n")
 
 
 def action(msg, channel=""):
@@ -311,7 +311,7 @@ def textwatch():
             sendmsg(random.choice(refuse))
 
     if text.lower().find(botnick.lower()) != -1:  # respond with bot info
-        if text.lower().find("who is") != -1 or text.lower().find("who are you") != -1:
+        if text.lower().find("who is") != -1 or text.lower().find("who are you") != -1 or text.find("!identify") != -1:
             sendmsg("I'm " + botnick +
                     " and I'm a bot made by Cha0zz. | https://github.com/Cha0zz/Jimmy")
             sendmsg("Use !help for a list of available commands.")
@@ -489,6 +489,8 @@ def helpwatch():
         elif "dict" in text:
             sendmsg(
                 "Searches a dictionairy for a definition | !dict <query>")
+        elif "identify" in text:
+            sendmsg("Gives information about the bot.")
         else:
             sendmsg(
                 "The available commands are " + commands_str)
@@ -719,7 +721,7 @@ def googlewatch():
     This function searches google or google images for a given query.
     """
     try:
-        if text.find("!google") != -1:  # search google
+        if text.find("!google") != -1 or text.find(":!g ") != -1:  # search google
             search_list = text.split()[4:]
             search = " ".join(search_list)
             search_query = urllib.urlencode({'q': search})
@@ -844,7 +846,7 @@ def REKT():
             else:
                 sendmsg("I currently only have mission maps.")
         except:
-            sendmsg("Somthing went wrong.")
+            sendmsg(error)
 
 
 def pm():
@@ -878,7 +880,7 @@ def weather():
             sendmsg(place + " | " + weather_text + " | " + temperature +
                     " C | " + wind_speed + " km/h " + wind_direction + " wind")
         except:
-            sendmsg("Somthing went wrong.")
+            sendmsg(error)
 
     if text.find("!moon") != -1:  # gets the current moonphase
         try:
@@ -890,9 +892,25 @@ def weather():
                 location_id)
             moon = weather_com_result[
                 "current_conditions"]["moon_phase"]["text"]
-            sendmsg(moon)
+            if moon.lower() == "new moon":
+                moon += " | " + u"\U0001F311"
+            elif moon.lower() == "waxing crescent":
+                moon += " | " + u"\U0001F312"
+            elif moon.lower() == "first quarter":
+                moon += " | " + u"\U0001F313"
+            elif moon.lower() == "waxing gibbous":
+                moon += " | " + u"\U0001F314"
+            elif moon.lower() == "full moon":
+                moon += " | " + u"\U0001F315"
+            elif moon.lower() == "waning gibbous":
+                moon += " | " + u"\U0001F316"
+            elif moon.lower() == "last quarter":
+                moon += " | " + u"\U0001F317"
+            elif moon.lower() == "waning crescent":
+                moon += " | " + u"\U0001F318"
+            sendmsg(unicode(moon))
         except:
-            sendmsg("Somthing went wrong.")
+            sendmsg(error)
 
 
 def urban():
@@ -906,20 +924,21 @@ def urban():
                 definition = definition[0:430] + "..."
             sendmsg(definition)
         except:
-            sendmsg("BROKEN!!!!")
+            sendmsg(error)
 
 
 def lookup():
+    """
+    Look stuff up in a dictionary
+    """
     if text.find("!dict") != -1:
         try:
             search = " ".join(text.split()[4:])
             search_query = urllib.urlencode({'term': search})
             url = "http://www.dictionary.com/cgi-bin/dict.pl?" + search_query
-            #url = "http://www.oxforddictionaries.com/definition/english/" + search
             response = urllib2.urlopen(url).read()
             start = int(response.find(
                 '<div class="def-content">')) + 25
-            #start_part = response[start+25:]
             end = int(response.find("</div>", start))
             definition = response[start:end].replace("\n", "")
             definition = re.sub('\<.*?\>', '', definition)
@@ -940,7 +959,6 @@ def bot():
     """
     while 1:  # puts it in a loop
         global text
-        #user_text = ""
         text = irc.recv(4096)  # receive the text
         print(text)  # print text to console
 
@@ -984,7 +1002,6 @@ while 1:
     """
     Stuff to send messages/ do stuff from the command line.
     """
-    #global channel
     user_text = str(raw_input(""))
     if user_text.find("/channel") != -1:
         channel = user_text.split()[1]
