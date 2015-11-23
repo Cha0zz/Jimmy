@@ -6,7 +6,7 @@ Created on 20-sep.-2015
 
 @author: jasperdelaey
 
-This program is an IRC Chatbot.
+This program is an IRC Chatbot created with the help of a tutorial found on: http://wiki.shellium.org/w/Writing_an_IRC_bot_in_Python
 '''
 
 
