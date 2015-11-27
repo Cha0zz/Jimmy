@@ -23,7 +23,7 @@ import thread
 import lxml
 from lxml import etree
 import pywapi
-import urbandict
+#import urbandict
 import time
 
 server = "burstfire.uk.eu.gamesurge.net"  # settingss
@@ -96,8 +96,11 @@ def sendmsg(msg, channel=""):
     """
     if channel == "":
         channel = text.split()[2]
-    irc.send("PRIVMSG " + channel + " :" +
-             msg.encode('utf-8', 'ignore') + "\n")
+    try:
+        irc.send("PRIVMSG " + channel + " :" +
+                 msg.encode('utf-8', 'ignore') + "\n")
+    except:
+        pass
 
 
 def action(msg, channel=""):
@@ -917,7 +920,7 @@ def weather():
         except:
             sendmsg(error)
 
-
+"""
 def urban():
     if text.find("!urban") != -1:
         try:
@@ -930,7 +933,29 @@ def urban():
             sendmsg(definition)
         except:
             sendmsg(error)
+"""
 
+def urban2():
+    """
+    lookup stuff in the urban dictionary, now without library.
+    """
+    if "!urban" in text:
+        try:
+            search = " ".join(text.split()[4:])
+            search_query = urllib.urlencode({'term': search})
+            url = "http://www.urbandictionary.com/define.php?" + search_query
+            response = urllib.urlopen(url).read().replace("<br/>", " ").replace("\n", "").replace("&gt;", ">")
+            start = int(response.find("<div class='meaning'>")) + len("<div class='meaning'>")
+            end = int(response.find("</div>",start))
+            definition = " ".join(response[start:end].split())
+            definition = re.sub('\<.*?\>', '', definition)
+            print(definition)
+            if len(definition) > 430:
+                definition = definition[0:430] + "..."
+            sendmsg("This is what I could find | " + url)
+            sendmsg(definition)
+        except:
+            sendmsg(error)
 
 def lookup():
     """
@@ -994,7 +1019,8 @@ def bot():
             pm()
             REKT()
             weather()
-            urban()
+            #urban()
+            urban2()
             lookup()
         wakewatch()
         quitwatch()
