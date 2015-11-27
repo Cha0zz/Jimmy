@@ -25,6 +25,7 @@ from lxml import etree
 import pywapi
 #import urbandict
 import time
+import ast
 
 server = "burstfire.uk.eu.gamesurge.net"  # settingss
 channel = "#limittheory"
@@ -246,11 +247,14 @@ def textwatch():
         sendmsg(random.choice(sentences))
 
     if text.lower().find(botnick.lower()) != -1 and text.find("tell") != -1 and text.find("telling") == -1:  # make the bot tell things
-        name1 = text.split()[5]
-        message_list = text.split()[6:]
-        message = " ".join(message_list)
-        sendmsg(name1 + ", " + name +
-                " wanted me to tell you " + "'" + message + "'")
+        if text.find("tell") > text.lower().find(botnick.lower()):
+            name1 = text.split()[5]
+            message_list = text.split()[6:]
+            message = " ".join(message_list)
+            sendmsg(name1 + ", " + name +
+                    " wanted me to tell you " + "'" + message + "'")
+        else:
+            pass
 
     if text.lower().find(botnick.lower()) != -1 and text.find("give") != -1 and text.find("gives") == -1:  # make the bot give things
         name1 = text.split()[5]
@@ -981,6 +985,7 @@ def lookup():
                 sendmsg(definition)
         except:
             sendmsg(error)
+
 
 
 def bot():
