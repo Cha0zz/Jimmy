@@ -23,9 +23,9 @@ import thread
 import lxml
 from lxml import etree
 import pywapi
-#import urbandict
-import time
-import ast
+# import urbandict
+# import time
+# import ast
 
 server = "burstfire.uk.eu.gamesurge.net"  # settingss
 channel = "#limittheory"
@@ -99,7 +99,8 @@ def sendmsg(msg, channel=""):
         channel = text.split()[2]
     try:
         irc.send("PRIVMSG " + channel + " :" +
-                 msg.encode('utf-8', 'ignore') + "\n")
+                 msg + "\n")
+        # msg.encode('utf-8', 'ignore')
     except:
         pass
 
@@ -697,7 +698,7 @@ def wikiwatch():
     Search wikipedia
     """
     try:
-        if text.find("!wiki") != -1 or text.find("!wikipedia") != -1:
+        if text.find("!wiki") != -1 or text.find("!wikipedia") != -1 or text.find("!w ") != -1:
             search_list = text.split()[4:]
             search = " ".join(search_list)
             summary = wikipedia.summary(search, sentences=2)
@@ -789,7 +790,7 @@ def googlewatch():
                 sendmsg(title1.encode('utf-8', 'ignore') +
                         " | " + url1.encode('utf-8', 'ignore'))
     except:
-        sendmsg(error)
+        sendmsg("Google discontinued its ajax api :(")
 
 
 def dicewatch():  # !roll 5d10
@@ -920,7 +921,7 @@ def weather():
                 moon += " | " + u"\U0001F317"
             elif moon.lower() == "waning crescent":
                 moon += " | " + u"\U0001F318"
-            sendmsg(unicode(moon))
+            sendmsg(unicode(moon).encode('utf-8', 'ignore'))
         except:
             sendmsg(error)
 
@@ -939,33 +940,39 @@ def urban():
             sendmsg(error)
 """
 
+
 def urban2():
     """
     lookup stuff in the urban dictionary, now without library.
     """
-    if "!urban" in text:
+    if "!urban" in text or "!u " in text:
         try:
+            name = text.split("!")[0].strip(":")
             search = " ".join(text.split()[4:])
             search_query = urllib.urlencode({'term': search})
             url = "http://www.urbandictionary.com/define.php?" + search_query
-            response = urllib.urlopen(url).read().replace("<br/>", " ").replace("\n", "").replace("&gt;", ">")
-            start = int(response.find("<div class='meaning'>")) + len("<div class='meaning'>")
-            end = int(response.find("</div>",start))
+            response = urllib.urlopen(url).read().replace(
+                "<br/>", " ").replace("\n", "").replace("&gt;", ">")
+            start = int(response.find("<div class='meaning'>")
+                        ) + len("<div class='meaning'>")
+            end = int(response.find("</div>", start))
             definition = " ".join(response[start:end].split())
-            definition = re.sub('\<.*?\>', '', definition)
-            print(definition)
+            definition = re.sub('\<.*?\>', '', definition).replace("&quot;", "'").replace("&#39;", "'")
             if len(definition) > 430:
                 definition = definition[0:430] + "..."
-            sendmsg("This is what I could find | " + url)
-            sendmsg(definition)
+            # sendmsg("This is what I could find | " + url)
+            # sendmsg(definition)
+            sendpm(name, "This is what I could find | " + url)
+            sendpm(name, definition)
         except:
             sendmsg(error)
+
 
 def lookup():
     """
     Look stuff up in a dictionary
     """
-    if text.find("!dict") != -1:
+    if text.find("!dict") != -1 or text.find("!define") != -1:
         try:
             search = " ".join(text.split()[4:])
             search_query = urllib.urlencode({'term': search})
@@ -978,14 +985,16 @@ def lookup():
             definition = re.sub('\<.*?\>', '', definition)
             if len(definition) > 430:
                 definition = definition[0:430] + "..."
-            if "-//W3C//DTD" in definition:
+            if "www.facebook.com" in definition:
                 sendsmg("I'm not sure what you mean | " + url)
             else:
-                sendmsg("This is what I could find | " + url)
-                sendmsg(definition)
+                if response.find("there's not a match on Dictionary.com.") != -1:
+                    sendmsg("I couldn't find the requested word(s).")
+                else:
+                    sendmsg("This is what I could find | " + url)
+                    sendmsg(definition)
         except:
             sendmsg(error)
-
 
 
 def bot():
@@ -1022,9 +1031,9 @@ def bot():
             googlewatch()
             dicewatch()
             pm()
-            REKT()
+            # REKT()
             weather()
-            #urban()
+            # urban()
             urban2()
             lookup()
         wakewatch()
@@ -1039,18 +1048,25 @@ while 1:
     Stuff to send messages/ do stuff from the command line.
     """
     user_text = str(raw_input(""))
-    if user_text.find("/channel") != -1:
-        channel = user_text.split()[1]
-    elif user_text.find("/join") != -1:
-        chan = user_text.split()[1]
-        changechannel(chan)
-    elif user_text.find("/quit") != -1:
-        irc.send("QUIT" + "\n")
-    elif user_text.find("/me") != -1:
-        msg = " ".join(user_text.split()[1:])
-        action(msg, channel)
-    elif user_text.find("/nick") != -1:
-        nick = user_text.split()[1]
-        changenick(nick)
-    else:
-        sendmsg(user_text, channel)
+    try:
+        if user_text.find("/channel") != -1:
+            channel = user_text.split()[1]
+        elif user_text.find("/join") != -1:
+            chan = user_text.split()[1]
+            changechannel(chan)
+        elif user_text.find("/quit") != -1:
+            irc.send("QUIT" + "\n")
+        elif user_text.find("/me") != -1:
+            msg = " ".join(user_text.split()[1:])
+            action(msg, channel)
+        elif user_text.find("/nick") != -1:
+            nick = user_text.split()[1]
+            changenick(nick)
+        elif "/pm" in user_text:
+            nick = user_text.split()[1]
+            msg = user_text.split()[2:]
+            sendpm(nick, msg)
+        else:
+            sendmsg(user_text, channel)
+    except:
+        pass
