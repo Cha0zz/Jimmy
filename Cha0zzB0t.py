@@ -23,6 +23,10 @@ import thread
 import lxml
 from lxml import etree
 import pywapi
+import mechanize
+from urlparse import urlparse
+import hashlib
+# from apiclient.discovery import build
 # import urbandict
 # import time
 # import ast
@@ -48,6 +52,8 @@ override = False
 cheercount = 0
 hailcount = 0
 wavecount = 0
+
+
 error = "Something went wrong."
 
 
@@ -95,12 +101,17 @@ def sendmsg(msg, channel=""):
     """
     This function is responsible for sending messages to the IRC stream
     """
-    if channel == "":
+
+    if channel == "":  # select the correct channel to answer to.
         channel = text.split()[2]
+    if channel == botnick:  # correctly answer to pm's
+        channel = text.split("!")[0].strip(":")
+
     try:
         irc.send("PRIVMSG " + channel + " :" +
                  msg + "\n")
         # msg.encode('utf-8', 'ignore')
+        print(botnick + ": " + channel + " " + msg)
     except:
         pass
 
@@ -111,7 +122,7 @@ def action(msg, channel=""):
     """
     if channel == "":
         channel = text.split()[2]
-    sendmsg("\001ACTION " + msg + "\001")
+    sendmsg("\001ACTION " + msg + "\001", channel)
 
 
 def sendpm(name, msg):
@@ -119,6 +130,7 @@ def sendpm(name, msg):
     This function sends a pm
     """
     irc.send("PRIVMSG " + name + " :" + msg + "\n")
+    print(botnick + ": " + name + " " + msg)
 
 
 def sleepwatch():
@@ -369,7 +381,7 @@ def textwatch():
             sendmsg(
                 'Use "," or "or" to separate the possible choices.')
 
-    if text.find(":!no") != -1:  # NOOOOOOOO
+    if text.find("!no") != -1:  # NOOOOOOOO
         sendmsg(
             "Noooooo | http://www.nooooooooooooooo.com")
 
@@ -510,7 +522,7 @@ def helpwatch():
             sendmsg(
                 "For info about a specific command use '!help <command>' (without the '!' infront of the command)")
 
-    if text.lower().find(botnick.lower()) != -1 and text.lower().find("help") != -1:
+    elif text.lower().find(botnick.lower()) != -1 and text.lower().find("help") != -1:
         sendmsg(
             "The available commands are " + commands_str)
         sendmsg("for info about a specific command use '!help <command>'")
@@ -656,11 +668,13 @@ def musicwatch():
             "//span[@id='eow-title']/@title"))
         sendmsg(video_title + " | " + link)
 
-    if text.find("!youtube") != -1 or text.find("!yt") != -1 or text.find("!video") != -1:  # searches youtube
+    if text.find("!youtube") != -1 or text.find("!yt") != -1 or text.find("!video") != -1 or text.find("!y ") != -1:  # searches youtube
         try:
+            string = text[text.find("!y"):]
+            search = string[string.find(" ") + 1:].rstrip("\n")
             result_list = []
-            search_list = text.split()[4:]
-            search = " ".join(search_list)
+            # search_list = text.split()[4:]
+            # search = " ".join(search_list)
             search_query = urllib.urlencode({"search_query": search})
             url = "http://www.youtube.com/results?" + search_query
             response = urllib2.urlopen(url)
@@ -669,14 +683,18 @@ def musicwatch():
             for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
                 result_list.append(
                     "http://www.youtube.com" + vid['href'])
-            link = result_list[0]
+            prevents from returning a user instead of a video
+            if "/user/" in result_list[0]:
+                link = result_list[1]
+            else:
+                link = result_list[0]
             youtube = etree.HTML(urllib.urlopen(link).read())
             video_title = " ".join(youtube.xpath(
                 "//span[@id='eow-title']/@title"))
             sendmsg(video_title.encode('utf-8', 'ignore') +
                     " | " + link.encode('utf-8', 'ignore'))
         except:
-            sendmsg("Something went wrong.")
+            sendmsg(error)
 
 """
     if "!plist" in text:  # send a list of all the music in the personal library
@@ -699,8 +717,10 @@ def wikiwatch():
     """
     try:
         if text.find("!wiki") != -1 or text.find("!wikipedia") != -1 or text.find("!w ") != -1:
+            string = text[text.find("!w"):]
+            search = string[string.find(" ") + 1:].rstrip("\n")
             search_list = text.split()[4:]
-            search = " ".join(search_list)
+            # search = " ".join(search_list)
             summary = wikipedia.summary(search, sentences=2)
             if len(summary) > 430:
                 summary = summary[0:430] + "..."
@@ -734,9 +754,11 @@ def googlewatch():
     This function searches google or google images for a given query.
     """
     try:
-        if text.find("!google") != -1 or text.find(":!g ") != -1:  # search google
+        if text.find("!google") != -1 or text.find("!g ") != -1:  # search google
+            string = text[text.find("!g"):]
+            search = string[string.find(" ") + 1:].rstrip("\n")
             search_list = text.split()[4:]
-            search = " ".join(search_list)
+            # search = " ".join(search_list)
             search_query = urllib.urlencode({'q': search})
             response = urllib2.urlopen(
                 "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&" + search_query).read()
@@ -751,6 +773,91 @@ def googlewatch():
             sendmsg(title.encode('utf-8', 'ignore') + " | " + url)
     except:
         sendmsg(error)
+
+    if "!image" in text or "!img" in text or "!i " in text:
+        # With help of:
+        # https://github.com/creeveshft/Web_Scraping/blob/master/Google%20Image%20Searcher/getimage.py
+        url_list = []
+        answer_list = []
+        max_amount = "3"
+        k = 0
+
+        sentence = text.split()
+
+        string = text[text.find("!i"):]
+
+        for word in sentence:
+            if word[1].isdigit and word[0] == "x":
+                if len(word) > int(max_amount) + 1 or int(word[1]) > int(max_amount):
+                    amount = 3
+                    sendmsg(
+                        "The maximum amount of allowed images is 3.")
+                else:
+                    amount = int(word[1])
+
+                string = string.replace(word, "")
+            else:
+                amount = 1
+
+        search = string[string.find(" ") + 1:].rstrip("\n")
+        search_query = urllib.urlencode({'q': search})
+
+        browser = mechanize.Browser()
+        browser.set_handle_robots(False)
+        browser.addheaders = [('User-agent', 'Mozilla')]
+
+        html = browser.open(
+            "https://www.google.com/search?site=imghp&tbm=isch&source=hp&biw=1414&bih=709&" + search_query + "&o" + search_query)
+        # html = urllib.urlopen("https://www.google.com/search?site=imghp&tbm=isch&source=hp&biw=1414&bih=709&q="+search+"&oq="+search).read()
+
+        soup = BeautifulSoup(html)
+        #print(soup)
+        results = soup.findAll("a")
+        #print(results)
+        for i in results:
+            #print(i)
+            i = str(i)
+            # if "imgres?imgurl" in i:
+            #start = i.find("imgres?imgurl") + len("imgres?imgurl")
+            #end = i.find("jsaction",start)
+            # url_list.append(i[start:end])
+            if "src=" in i:
+                start = i.find("src=") + 5
+                end = i.find("width=") - 2
+                url_list.append(i[start:end])
+
+        #print(url_list)
+
+        while k < amount:
+            answer_list.append(url_list[k])
+            k += 1
+
+        answer = " | ".join(answer_list)
+
+        sendmsg("This is what I could find | " + answer)
+
+    """
+    if "!image" in text or "!img" in text or "!i " in text:
+        keyBing = ""
+        credentialBing = 'Basic ' + \
+            (':%s' % keyBing).encode('base64')[:-1]
+        search_list = text.split()[4:]
+        search = " ".join(search_list)
+        searchString = urllib.urlencode({'Query': search})
+        # searchString = urllib.urlencode({"Query", search})
+        url = "https://api.datamarket.azure.com/Bing/Search/v1/Image?" + \
+            searchString + "%27&$top=5&$format=json"
+        request = urllib2.Request(url)
+        request.add_header('Authorization', credentialBing)
+        print(request)
+        request_opener = urllib2.build_opener()
+        response = request_opener.open(request)
+        response_data = response.read()
+        result = json.loads(response_data)
+        print(result)
+    """
+
+    """
     try:
         if text.find("!image") != -1 or text.find("!img") != -1:  # search google images
             search_list = text.split()[4:]
@@ -791,6 +898,7 @@ def googlewatch():
                         " | " + url1.encode('utf-8', 'ignore'))
     except:
         sendmsg("Google discontinued its ajax api :(")
+    """
 
 
 def dicewatch():  # !roll 5d10
@@ -875,7 +983,9 @@ def weather():
     """
     if text.find("!weather") != -1:  # gets the weather for a given location
         try:
-            location = " ".join(text.split()[4:])
+            string = text[text.find("!w"):]
+            location = string[string.find(" ") + 1:].rstrip("\n")
+            # location = " ".join(text.split()[4:])
             lookup = pywapi.get_location_ids(location)
             for i in lookup:
                 location_id = i
@@ -947,8 +1057,10 @@ def urban2():
     """
     if "!urban" in text or "!u " in text:
         try:
+            string = text[text.find("!u"):]
+            search = string[string.find(" ") + 1:].rstrip("\n")
             name = text.split("!")[0].strip(":")
-            search = " ".join(text.split()[4:])
+            # search = " ".join(text.split()[4:])
             search_query = urllib.urlencode({'term': search})
             url = "http://www.urbandictionary.com/define.php?" + search_query
             response = urllib.urlopen(url).read().replace(
@@ -957,7 +1069,8 @@ def urban2():
                         ) + len("<div class='meaning'>")
             end = int(response.find("</div>", start))
             definition = " ".join(response[start:end].split())
-            definition = re.sub('\<.*?\>', '', definition).replace("&quot;", "'").replace("&#39;", "'")
+            definition = re.sub(
+                '\<.*?\>', '', definition).replace("&quot;", "'").replace("&#39;", "'")
             if len(definition) > 430:
                 definition = definition[0:430] + "..."
             # sendmsg("This is what I could find | " + url)
@@ -972,9 +1085,11 @@ def lookup():
     """
     Look stuff up in a dictionary
     """
-    if text.find("!dict") != -1 or text.find("!define") != -1:
+    if text.find("!dict") != -1 or text.find("!define") != -1 or text.find("!d ") != -1:
         try:
-            search = " ".join(text.split()[4:])
+            string = text[text.find("!d"):]
+            search = string[string.find(" ") + 1:].rstrip("\n")
+            # search = " ".join(text.split()[4:])
             search_query = urllib.urlencode({'term': search})
             url = "http://www.dictionary.com/cgi-bin/dict.pl?" + search_query
             response = urllib2.urlopen(url).read()
