@@ -26,6 +26,7 @@ import pywapi
 import mechanize
 from urlparse import urlparse
 import hashlib
+import string
 # from apiclient.discovery import build
 # import urbandict
 # import time
@@ -52,6 +53,7 @@ override = False
 cheercount = 0
 hailcount = 0
 wavecount = 0
+readbuffer = ""
 
 
 error = "Something went wrong."
@@ -76,7 +78,7 @@ commands = ["!nick", "!quit", "!help", "!join", "!leave", "!sleep", "!wake", "!w
             "!urban", "!dict", "!identify"]  # list of available commands
 
 greetings = ["Hi", "Hello", "Hey", "Greetings",
-             "Heyaa", "Howdy"]  # list of greetings
+             "Heyaa", "Howdy", "Aloha", "Hola", "Bonjour", "Ciao"]  # list of greetings
 
 sentences = ["You talkin' to me?", "You talkin' 'bout me?",
              "\001ACTION rustles his jimmies. \001"]  # list of random sentences
@@ -299,10 +301,10 @@ def textwatch():
 
     if text.lower().find(botnick.lower()) != -1:
         for i in compliment:
-            if text.lower().find(i) != -1 and i not in name:  # response to compliments
+            if text.lower().find(i) != -1 and name.lower().find(i) == -1:  # response to compliments
                 sendmsg(":D Thanks " + name)
 
-    if text.lower().find(botnick.lower()) != -1 and text.find("countdown") != -1 or text.find(":!countdown") != -1:  # final countdown
+    if text.lower().find(botnick.lower()) != -1 and text.find("countdown") != -1 or text.find("!countdown") != -1:  # final countdown
         sendmsg(
             "3 ... 2 ... 1 | https://www.youtube.com/watch?v=9jK-NcRmVcw&gl=BE")
 
@@ -381,7 +383,7 @@ def textwatch():
             sendmsg(
                 'Use "," or "or" to separate the possible choices.')
 
-    if text.find("!no") != -1:  # NOOOOOOOO
+    if text.find("!no") != -1 and text.find("node") == -1:  # NOOOOOOOO
         sendmsg(
             "Noooooo | http://www.nooooooooooooooo.com")
 
@@ -662,6 +664,9 @@ def musicwatch():
             sendmsg("I couldn't find any music in your personal library.")
 
     if text.lower().find(botnick.lower()) != -1 and text.lower().find("music") != -1 or text.find("!music") != -1:  # give music out of the music list
+        if "add" in text:
+            sendmsg(
+                "The correct command to add music to the music list is '!add <music-url>'")
         link = random.choice(array)
         youtube = etree.HTML(urllib.urlopen(link).read())
         video_title = " ".join(youtube.xpath(
@@ -683,7 +688,7 @@ def musicwatch():
             for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
                 result_list.append(
                     "http://www.youtube.com" + vid['href'])
-            prevents from returning a user instead of a video
+            # prevents from returning a user instead of a video
             if "/user/" in result_list[0]:
                 link = result_list[1]
             else:
@@ -811,11 +816,11 @@ def googlewatch():
         # html = urllib.urlopen("https://www.google.com/search?site=imghp&tbm=isch&source=hp&biw=1414&bih=709&q="+search+"&oq="+search).read()
 
         soup = BeautifulSoup(html)
-        #print(soup)
+        # print(soup)
         results = soup.findAll("a")
-        #print(results)
+        # print(results)
         for i in results:
-            #print(i)
+            # print(i)
             i = str(i)
             # if "imgres?imgurl" in i:
             #start = i.find("imgres?imgurl") + len("imgres?imgurl")
@@ -826,7 +831,7 @@ def googlewatch():
                 end = i.find("width=") - 2
                 url_list.append(i[start:end])
 
-        #print(url_list)
+        # print(url_list)
 
         while k < amount:
             answer_list.append(url_list[k])
@@ -1112,48 +1117,81 @@ def lookup():
             sendmsg(error)
 
 
+def translate(language1="", language2="", sentence=""):
+# https://glosbe.com/a-api
+    if language1 == "" or language2 == "" or sentence == "":
+        line = text[text.find("!t"):]
+        line_list = line.split(" ")
+        language1 = line_list[0]
+        language2 = line_list[1]
+        sentence = " ".join(line_list[2:])
+
+    query = urllib.urlencode({"from" : language1, "dest": language2, "phrase": sentence, "format" : "json" })
+
+    url = "https://glosbe.com/gapi/translate?" + query
+
+    response = urllib2.urlopen(url).read()
+    data = json.loads(response)
+
+    translation = data["tuc"][0]["phrase"]["text"]
+    meaning = data ["tuc"][0]["meanings"]["text"]
+
+    sendmsg(translation)
+    sendmsg(meaning)
+
+
 def bot():
     """
     stuff handled by the bot
     """
     while 1:  # puts it in a loop
         global text
-        text = irc.recv(4096)  # receive the text
-        print(text)  # print text to console
+        global readbuffer
+        received = irc.recv(4096)  # receive the text
+        readbuffer = readbuffer + received
+        temp = string.split(readbuffer, "\n")
+        readbuffer = temp.pop()
 
-        if text.find('PING') != -1:  # check if 'PING' is found
-            # returnes 'PONG' back to the server
-            # (prevents pinging out!)
-            irc.send('PONG ' + text.split()
-                     [1] + '\r\n')
+        for text in temp:
+            text = string.rstrip(text)
+            text = string.split(text)
+            text = " ".join(text)
 
-        if text.lower().find("to connect, type") != -1:
-            irc.send('PONG ' + text.split()
-                     [1] + '\r\n')
+            print(text)  # print text to console
 
-        if connected is False:
-            irc.send("JOIN " + channel + "\r\n")
+            if text.find('PING') != -1:  # check if 'PING' is found
+                # returnes 'PONG' back to the server
+                # (prevents pinging out!)
+                irc.send('PONG ' + text.split()
+                         [1] + '\r\n')
 
-        if sleep is False and override is False:
-            changenick()
-            textwatch()
-            helpwatch()
-            greetingwatch()
-            changechannel()
-            sleepwatch()
-            musicwatch()
-            wikiwatch()
-            googlewatch()
-            dicewatch()
-            pm()
-            # REKT()
-            weather()
-            # urban()
-            urban2()
-            lookup()
-        wakewatch()
-        quitwatch()
-        overridewatch()
+            # if text.lower().find("to connect, type") != -1:
+                # irc.send('PONG ' + text.split()
+                #[1] + '\r\n')
+
+            if connected is False:
+                irc.send("JOIN " + channel + "\r\n")
+
+            if sleep is False and override is False:
+                changenick()
+                textwatch()
+                helpwatch()
+                greetingwatch()
+                changechannel()
+                sleepwatch()
+                musicwatch()
+                wikiwatch()
+                googlewatch()
+                dicewatch()
+                pm()
+                # REKT()
+                weather()
+                # urban()
+                urban2()
+                lookup()
+            wakewatch()
+            quitwatch()
+            overridewatch()
 
 # put the listener/ bot in his own thread
 thread.start_new_thread(bot, ())
