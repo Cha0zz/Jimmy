@@ -33,7 +33,7 @@ import string
 # import ast
 
 server = "burstfire.uk.eu.gamesurge.net"  # settingss
-channel = "#limittheory"
+channel = "#talstest"
 botnick = "Jimmy42"
 
 # defines the socket
@@ -1118,7 +1118,7 @@ def lookup():
 
 
 def translate(language1="", language2="", sentence=""):
-# https://glosbe.com/a-api
+    # https://glosbe.com/a-api
     if language1 == "" or language2 == "" or sentence == "":
         line = text[text.find("!t"):]
         line_list = line.split(" ")
@@ -1126,7 +1126,8 @@ def translate(language1="", language2="", sentence=""):
         language2 = line_list[1]
         sentence = " ".join(line_list[2:])
 
-    query = urllib.urlencode({"from" : language1, "dest": language2, "phrase": sentence, "format" : "json" })
+    query = urllib.urlencode(
+        {"from": language1, "dest": language2, "phrase": sentence, "format": "json"})
 
     url = "https://glosbe.com/gapi/translate?" + query
 
@@ -1134,7 +1135,7 @@ def translate(language1="", language2="", sentence=""):
     data = json.loads(response)
 
     translation = data["tuc"][0]["phrase"]["text"]
-    meaning = data ["tuc"][0]["meanings"]["text"]
+    meaning = data["tuc"][0]["meanings"]["text"]
 
     sendmsg(translation)
     sendmsg(meaning)
@@ -1147,7 +1148,7 @@ def bot():
     while 1:  # puts it in a loop
         global text
         global readbuffer
-        received = irc.recv(4096)  # receive the text
+        received = irc.recv(2048)  # receive the text
         readbuffer = readbuffer + received
         temp = string.split(readbuffer, "\n")
         readbuffer = temp.pop()
