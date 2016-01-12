@@ -27,13 +27,14 @@ import mechanize
 from urlparse import urlparse
 import hashlib
 import string
+import time
 # from apiclient.discovery import build
 # import urbandict
-# import time
 # import ast
 
-server = "burstfire.uk.eu.gamesurge.net"  # settingss
-channel = "#talstest"
+#server = "burstfire.uk.eu.gamesurge.net"
+server = "irc.web.gamesurge.net"  # settings
+channel = "#limittheory"
 botnick = "Jimmy42"
 
 # defines the socket
@@ -250,6 +251,10 @@ def textwatch():
             if hailcount == 4:
                 hailcount = 0
 
+    if "tableflip" in text.lower():
+        time.sleep(2)
+        sendmsg("┬──┬ ノ( ゜-゜ノ)")
+
     if text.lower().find(botnick.lower()) != -1 and text.find("sing") != -1 and text.find("song") != -1 or text.find("!sing") != -1:  # lets the bot sing a song
         sendmsg("It's called Daisy.")
         sendmsg("Daisy ... Daisy ...")
@@ -383,7 +388,7 @@ def textwatch():
             sendmsg(
                 'Use "," or "or" to separate the possible choices.')
 
-    if text.find("!no") != -1 and text.find("node") == -1:  # NOOOOOOOO
+    if text.lower().find("!no") != -1 and text.find("node") == -1:  # NOOOOOOOO
         sendmsg(
             "Noooooo | http://www.nooooooooooooooo.com")
 
@@ -1080,6 +1085,7 @@ def urban2():
                 definition = definition[0:430] + "..."
             # sendmsg("This is what I could find | " + url)
             # sendmsg(definition)
+            sendmsg(name + " I've send you the results in a pm :)")
             sendpm(name, "This is what I could find | " + url)
             sendpm(name, definition)
         except:
@@ -1131,6 +1137,8 @@ def translate(language1="", language2="", sentence=""):
 
     url = "https://glosbe.com/gapi/translate?" + query
 
+    print(url)
+
     response = urllib2.urlopen(url).read()
     data = json.loads(response)
 
@@ -1154,45 +1162,44 @@ def bot():
         readbuffer = temp.pop()
 
         for text in temp:
-            text = string.rstrip(text)
-            text = string.split(text)
-            text = " ".join(text)
-
-            print(text)  # print text to console
-
-            if text.find('PING') != -1:  # check if 'PING' is found
+            if "PING" in text:  # check if 'PING' is found
                 # returnes 'PONG' back to the server
                 # (prevents pinging out!)
                 irc.send('PONG ' + text.split()
                          [1] + '\r\n')
 
-            # if text.lower().find("to connect, type") != -1:
-                # irc.send('PONG ' + text.split()
-                #[1] + '\r\n')
+            if not "GameSurge" in text:
+                #text = string.rstrip(text)
+                #text = string.split(text)
+                #text = " ".join(text)
 
-            if connected is False:
-                irc.send("JOIN " + channel + "\r\n")
+                print(text)
 
-            if sleep is False and override is False:
-                changenick()
-                textwatch()
-                helpwatch()
-                greetingwatch()
-                changechannel()
-                sleepwatch()
-                musicwatch()
-                wikiwatch()
-                googlewatch()
-                dicewatch()
-                pm()
-                # REKT()
-                weather()
-                # urban()
-                urban2()
-                lookup()
-            wakewatch()
-            quitwatch()
-            overridewatch()
+                if connected is False:
+                    irc.send("JOIN " + channel + "\r\n")
+
+                if sleep is False and override is False:
+                    changenick()
+                    textwatch()
+                    helpwatch()
+                    greetingwatch()
+                    changechannel()
+                    sleepwatch()
+                    musicwatch()
+                    wikiwatch()
+                    googlewatch()
+                    dicewatch()
+                    pm()
+                    # REKT()
+                    weather()
+                    # urban()
+                    urban2()
+                    lookup()
+                    #if text.find("!t ") != -1:
+                        #translate()
+                wakewatch()
+                quitwatch()
+                overridewatch()
 
 # put the listener/ bot in his own thread
 thread.start_new_thread(bot, ())
