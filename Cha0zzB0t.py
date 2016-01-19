@@ -32,7 +32,7 @@ import time
 # import urbandict
 # import ast
 
-#server = "burstfire.uk.eu.gamesurge.net"
+# server = "burstfire.uk.eu.gamesurge.net"
 server = "irc.web.gamesurge.net"  # settings
 channel = "#limittheory"
 botnick = "Jimmy42"
@@ -140,11 +140,11 @@ def sleepwatch():
     """
     This function puts the bot to sleep, it won't respond to other commands anymore
     """
-    if "!sleep" in text:
+    if "!sleep" in text.lower():
         global sleep
         sleep = True
         sendmsg("Zzzzzzz")
-    if "!corn_on" in text:
+    if "!corn_on" in text.lower():
         global corn_mode
         corn_mode = True
         sendmsg("I will stop doing things without it being asked")
@@ -154,11 +154,11 @@ def wakewatch():
     """
     This function wakes the bot up
     """
-    if "!wake" in text:
+    if "!wake" in text.lower():
         global sleep
         sleep = False
         sendmsg("I'm awake now.")
-    if "!corn_off" in text:
+    if "!corn_off" in text.lower():
         global corn_mode
         corn_mode = False
         sendmsg("I will resume cheering and waving!")
@@ -171,11 +171,11 @@ def changechannel(channel=""):
     if channel != "":
         irc.send("JOIN " + channel + "\r\n")
     else:
-        if ":!join" in text:  # join a new channel
+        if ":!join" in text.lower():  # join a new channel
             chan = text.split()[4]
             irc.send("JOIN " + chan + "\r\n")
             sendmsg('I joined the channel ' + chan)
-        if ":!leave" in text:  # leave a channel
+        if ":!leave" in text.lower():  # leave a channel
             chan = text.split()[4]
             irc.send("PART " + chan + "\r\n")
 
@@ -185,7 +185,7 @@ def changenick(nick="False"):
     This function changes the nick of the bot
     """
     global botnick
-    if ":!nick" in text:
+    if "!nick" in text.lower():
         try:
             botnick = text.split()[4]
             irc.send("NICK " + botnick + "\n")
@@ -255,7 +255,7 @@ def textwatch():
         time.sleep(2)
         sendmsg("┬──┬ ノ( ゜-゜ノ)")
 
-    if text.lower().find(botnick.lower()) != -1 and text.find("sing") != -1 and text.find("song") != -1 or text.find("!sing") != -1:  # lets the bot sing a song
+    if text.lower().find(botnick.lower()) != -1 and text.lower().find("sing") != -1 and text.lower().find("song") != -1 or text.lower().find("!sing") != -1:  # lets the bot sing a song
         sendmsg("It's called Daisy.")
         sendmsg("Daisy ... Daisy ...")
         sendmsg("Give me your answer, do.")
@@ -266,8 +266,8 @@ def textwatch():
     if text.lower().find(botnick.lower() + "?") != -1:
         sendmsg(random.choice(sentences))
 
-    if text.lower().find(botnick.lower()) != -1 and text.find("tell") != -1 and text.find("telling") == -1:  # make the bot tell things
-        if text.find("tell") > text.lower().find(botnick.lower()):
+    if text.lower().find(botnick.lower()) != -1 and text.lower().find("tell") != -1 and text.lower().find("telling") == -1:  # make the bot tell things
+        if text.lower().find("tell") > text.lower().find(botnick.lower()):
             name1 = text.split()[5]
             message_list = text.split()[6:]
             message = " ".join(message_list)
@@ -276,7 +276,7 @@ def textwatch():
         else:
             pass
 
-    if text.lower().find(botnick.lower()) != -1 and text.find("give") != -1 and text.find("gives") == -1:  # make the bot give things
+    if text.lower().find(botnick.lower()) != -1 and text.lower().find("give") != -1 and text.lower().find("gives") == -1:  # make the bot give things
         name1 = text.split()[5]
         message_list = text.split()[6:]
         message = " ".join(message_list)
@@ -285,7 +285,7 @@ def textwatch():
         sendmsg("\001ACTION" + " gives " + name1.replace("me",
                                                          name) + " " + final_message + "\001")
 
-    if text.lower().find(botnick.lower()) != -1 and text.find("fetch") != -1 and text.find("fetches") == -1:  # make the bot fetch things
+    if text.lower().find(botnick.lower()) != -1 and text.lower().find("fetch") != -1 and text.lower().find("fetches") == -1:  # make the bot fetch things
         name1 = text.split()[5]
         message_list = text.split()[6:]
         message = " ".join(message_list)
@@ -294,7 +294,7 @@ def textwatch():
         sendmsg("\001ACTION" + " fetches " +
                 name1.replace("me", name) + " " + final_message + "\001")
 
-    if text.lower().find(botnick.lower()) != -1 and text.find("bring") != -1 and text.find("brings") == -1:  # make the bot bring things
+    if text.lower().find(botnick.lower()) != -1 and text.lower().find("bring") != -1 and text.lower().find("brings") == -1:  # make the bot bring things
         name1 = text.split()[5]
         message_list = text.split()[6:]
         message = " ".join(message_list)
@@ -309,11 +309,11 @@ def textwatch():
             if text.lower().find(i) != -1 and name.lower().find(i) == -1:  # response to compliments
                 sendmsg(":D Thanks " + name)
 
-    if text.lower().find(botnick.lower()) != -1 and text.find("countdown") != -1 or text.find("!countdown") != -1:  # final countdown
+    if text.lower().find(botnick.lower()) != -1 and text.lower().find("countdown") != -1 or text.lower().find("!countdown") != -1:  # final countdown
         sendmsg(
             "3 ... 2 ... 1 | https://www.youtube.com/watch?v=9jK-NcRmVcw&gl=BE")
 
-    if text.lower().find(botnick.lower()) != -1 and text.find("update") != -1 and text.find("where") != -1 or text.find("!update") != -1:  # update song
+    if text.lower().find(botnick.lower()) != -1 and text.lower().find("update") != -1 and text.lower().find("where") != -1 or text.lower().find("!update") != -1:  # update song
         sendmsg(
             "Wup-date, wup-date ヾ(⌐■_■)ノ♪ | https://www.youtube.com/watch?v=I8jkz0pdHk8")
 
@@ -325,10 +325,10 @@ def textwatch():
         sendmsg("\001ACTION cracks whip \001")
         changenick(original_nick)
 
-    if text.lower().find("thank") != -1 and text.lower().find(botnick.lower()) != -1 and text.find("tell") == -1 and text.find("say") == -1:  # responding to people thanking the bot
+    if text.lower().find("thank") != -1 and text.lower().find(botnick.lower()) != -1 and text.lower().find("tell") == -1 and text.lower().find("say") == -1:  # responding to people thanking the bot
         sendmsg("You're welcome " + name)
 
-    if text.lower().find(botnick.lower()) != -1 and text.lower().find("make") != -1 and text.find("tell") == -1 and text.find("say") == -1:  # sudo make me a sandwich
+    if text.lower().find(botnick.lower()) != -1 and text.lower().find("make") != -1 and text.lower().find("tell") == -1 and text.lower().find("say") == -1:  # sudo make me a sandwich
         if text.lower().find("sudo") != -1:
             message_list = text.split()[6:]
             message = " ".join(message_list)
@@ -343,12 +343,12 @@ def textwatch():
                     " and I'm a bot made by Cha0zz. | https://github.com/Cha0zz/Jimmy")
             sendmsg("Use !help for a list of available commands.")
 
-    if text.find("!identify") != -1:
+    if text.lower().find("!identify") != -1:
         sendmsg("I'm " + botnick +
                 " and I'm a bot made by Cha0zz. | https://github.com/Cha0zz/Jimmy")
         sendmsg("Use !help for a list of available commands.")
 
-    if text.lower().find(botnick.lower()) != -1 and text.find("why") != -1:  # shrug
+    if text.lower().find(botnick.lower()) != -1 and text.lower().find("why") != -1:  # shrug
         sendmsg("¯\_(ツ)_/¯")
 
     if text.lower().find(botnick.lower() + " say") != -1 or text.lower().find(botnick.lower() + ", say") != -1:  # let the bot say things
@@ -361,13 +361,13 @@ def textwatch():
                 name + " back \001")
 
     # Choose something out of a given list
-    if text.lower().find(botnick.lower() + " choose") != -1 or text.find(":!choose") != -1:
-        if text.find("Cha0zz") != -1 and text.find("Cha0zz!") == -1:
+    if text.lower().find(botnick.lower() + " choose") != -1 or text.lower().find(":!choose") != -1:
+        if text.lower().find("cha0zz") != -1 and text.lower().find("cha0zz!") == -1:
             message_list = ["Cha0zz for he is my master.",
                             "Cha0zz", "My master, Cha0zz"]
-        elif text.find(" or") == -1:
+        elif text.lower().find(" or") == -1:
             message_list = text.split(",")[1:]
-            if text.find(":!choose") == -1:
+            if text.lower().find(":!choose") == -1:
                 message_list.append(
                     text.split()[5].strip(","))
             else:
@@ -375,7 +375,7 @@ def textwatch():
                     text.split()[4].strip(","))
         else:
             message_list = text.split(" or")[1:]
-            if text.find(":!choose") == -1:
+            if text.lower().find(":!choose") == -1:
                 message_list.append(
                     text.split()[5])
             else:
@@ -388,15 +388,15 @@ def textwatch():
             sendmsg(
                 'Use "," or "or" to separate the possible choices.')
 
-    if text.lower().find("!no") != -1 and text.find("node") == -1:  # NOOOOOOOO
+    if ":!no" in text.lower() or " !no" in text.lower() and text.lower().find("node") == -1:  # NOOOOOOOO
         sendmsg(
             "Noooooo | http://www.nooooooooooooooo.com")
 
-    if text.lower().find(botnick.lower()) != -1 and text.find("stay") != -1 and text.find("alive") != -1:  # stayin' alive
+    if text.lower().find(botnick.lower()) != -1 and text.lower().find("stay") != -1 and text.lower().find("alive") != -1:  # stayin' alive
         sendmsg(
             "Ha-Ha-Ha-Ha, stayin' alive | https://www.youtube.com/watch?v=I_izvAbhExY")
 
-    if text.lower().find("taiya") != -1 and text.find("dance") != -1 and text.lower().find(":taiya!") == -1:  # dancing queen
+    if text.lower().find("taiya") != -1 and text.lower().find("dance") != -1 and text.lower().find(":taiya!") == -1:  # dancing queen
         sendmsg(
             "Taiya, you are my dancing queen. | https://www.youtube.com/watch?v=xFrGuyw1V8s")
 
@@ -404,24 +404,24 @@ def textwatch():
         sendmsg(
             "Woof, woof, woof, woof | https://www.youtube.com/watch?v=Qkuu0Lwb5EM")
 
-    if text.lower().find(botnick.lower()) != -1 and text.find("eggs") != -1 and text.find("dozen") != -1:  # how many eggs go in a dozen
+    if text.lower().find(botnick.lower()) != -1 and text.lower().find("eggs") != -1 and text.lower().find("dozen") != -1:  # how many eggs go in a dozen
         sendmsg(
             "12 (－‸ლ) | https://www.youtube.com/watch?v=fwSYoj5E5JQ")
 
-    if text.find("!bed") != -1:  # BACK TO BED
+    if text.lower().find("!bed") != -1:  # BACK TO BED
         original_nick = botnick
         changenick("SleepyBalrog")
         sendmsg("BACK TO BED!")
         sendmsg("\001ACTION cracks pillow \001")
         changenick(original_nick)
 
-    if text.lower().find("jimmy") != -1 and text.find("what is your nick") != -1:  # relay botnick
+    if text.lower().find("jimmy") != -1 and text.lower().find("what is your nick") != -1:  # relay botnick
         sendmsg(botnick)
 
     if text.lower().find(botnick.lower()) != -1 and text.lower().find("answer") != -1 and text.lower().find("what") != -1:
         sendmsg("That's easy, obviously the answer is 42.")
 
-    if "!pudding" in text:
+    if "!pudding" in text.lower():
         pudding_list = ["PUDDING", "pudding", "PuDdInG"]
         sendmsg(random.choice(pudding_list))
 
@@ -440,88 +440,88 @@ def helpwatch():
         str(i) for i in commands)
 
     helplist = ["add", "remove", "music", "join", "leave", "nick"]
-    if "!help" in text:
+    if "!help" in text.lower():
 
         # for item in helplist:
             # if not item in text:
                 # sendmsg("Help document not implemented.")
 
-        if "pmusic" in text:
+        if "pmusic" in text.lower():
             sendmsg(
                 "Play music from your personal or someone else's library. | !pmusic <opt: person>")
-        elif "padd" in text:
+        elif "padd" in text.lower():
             sendmsg("Add music to your personal library | !padd <link>")
-        elif "premove" in text:
+        elif "premove" in text.lower():
             sendmsg(
                 "Remove music from your personal library | !premove <link>")
-        elif "psongcount" in text:
+        elif "psongcount" in text.lower():
             sendmsg(
                 "This function shows the amount of songs in your personal library.")
-        elif "songcount" in text:
+        elif "songcount" in text.lower():
             sendmsg(
                 "This function shows the amount of songs in the general library.")
-        elif "add" in text:
+        elif "add" in text.lower():
             sendmsg("This function adds music to " +
                     botnick + "'s music library. | !add <link>")
-        elif "remove" in text:
+        elif "remove" in text.lower():
             sendmsg("This function adds music to " +
                     botnick + "'s music library. | !remove <link>")
-        elif "music" in text:
+        elif "music" in text.lower():
             sendmsg("This function plays music from " +
                     botnick + "'s music library. | !music")
-        elif "join" in text:
+        elif "join" in text.lower():
             sendmsg("This function makes " + botnick +
                     " join a channel | !join <#channel>")
-        elif "leave" in text:
+        elif "leave" in text.lower():
             sendmsg("This function makes " + botnick +
                     " leave a channel | !leave <#channel>")
-        elif "nick" in text:
+        elif "nick" in text.lower():
             sendmsg("This function changes " + botnick +
                     "'s username | !nick <newnick>")
-        elif "sleep" in text:
+        elif "sleep" in text.lower():
             sendmsg(
                 "This function puts " + botnick + " to sleep, he won't respond to you anymore until he is awakened with '!wake' | !sleep")
-        elif "wake" in text:
+        elif "wake" in text.lower():
             sendmsg("This function awakens " + botnick +
                     " so that he starts responding again. | !wake")
-        elif "choose" in text:
+        elif "choose" in text.lower():
             sendmsg("Makes " + botnick +
                     " choose an item from a given list, separate items with ',' or 'or' | !choose <options>")
-        elif "corn_on" in text:
+        elif "corn_on" in text.lower():
             sendmsg("Prevents " + botnick +
                     " from doing things without it being asked such as greeting and waving.")
-        elif "corn_off" in text:
+        elif "corn_off" in text.lower():
             sendmsg("Disables corn_on mode.")
-        elif "youtube" in text:
+        elif "youtube" in text.lower():
             sendmsg(
                 "Search youtube for the given query | !youtube <search>")
-        elif "wiki" in text:
+        elif "wiki" in text.lower():
             sendmsg(
                 "Search wikipedia for the given query | !wiki <search>")
-        elif "google" in text:
+        elif "google" in text.lower():
             sendmsg(
                 "Search google for the given query | !google <search>")
-        elif "image" in text:
+        elif "image" in text.lower():
             sendmsg(
                 "Search google images for a given query | !image <search>")
-        elif "roll" in text:
+        elif "roll" in text.lower():
             sendmsg("Rolls a dice | !roll <AdX>")
-        elif "plist" in text:
+        elif "plist" in text.lower():
             sendmsg(
                 "Shows all the songs in your personal library | !plist <opt: name>")
-        elif "sing" in text:
+        elif "sing" in text.lower():
             sendmsg(botnick + " sings a song.")
-        elif "moon" in text:
+        elif "moon" in text.lower():
             sendmsg("Gives the current moon-phase")
-        elif "weather" in text:
+        elif "weather" in text.lower():
             sendmsg(
                 "Gives the weather for a location | !weather <location>")
-        elif "urban" in text:
+        elif "urban" in text.lower():
             sendmsg("Searches the urban dictionairy | !urban <query>")
-        elif "dict" in text:
+        elif "dict" in text.lower():
             sendmsg(
                 "Searches a dictionairy for a definition | !dict <query>")
-        elif "identify" in text:
+        elif "identify" in text.lower():
             sendmsg("Gives information about the bot.")
         else:
             sendmsg(
@@ -529,7 +529,7 @@ def helpwatch():
             sendmsg(
                 "For info about a specific command use '!help <command>' (without the '!' infront of the command)")
 
-    elif text.lower().find(botnick.lower()) != -1 and text.lower().find("help") != -1:
+    elif botnick.lower() in text.lower() and ("help " in text.lower() or " help" in text.lower()):
         sendmsg(
             "The available commands are " + commands_str)
         sendmsg("for info about a specific command use '!help <command>'")
@@ -540,10 +540,10 @@ def quitwatch():
     This function lets the bot leave the IRC stream
     """
     name = text.split("!")[0].strip(":")
-    if ":!quit" in text and text.find("Cha0zz@Cha0zz.user.gamesurge") != -1:
+    if "!quit" in text.lower() and ("Cha0zz@Cha0zz.user.gamesurge" in text or "Cha0zz@gamesurge" in text):
         sendmsg("I'm going, ciao.")
         irc.send("QUIT" + "\n")
-    elif ":!quit" in text and text.find("Cha0zz@Cha0zz.user.gamesurge") == -1:
+    elif "!quit" in text.lower() and text.find("Cha0zz@Cha0zz.user.gamesurge") == -1:
         if name == "Cha0zz":
             sendmsg("You're not the real Cha0zz.")
         else:
@@ -560,9 +560,9 @@ def musicwatch():
     songcount = len(array)
 
     # add music to your personal library
-    if text.find("!add") != -1 or text.find("!padd") != -1:
+    if text.lower().find("!add") != -1 or text.lower().find("!padd") != -1:
         song = text.split()[4]
-        if text.find("!padd") != -1:
+        if text.lower().find("!padd") != -1:
             if name not in pmusic:
                 pmusic[name] = []
             if song in pmusic[name]:
@@ -603,7 +603,7 @@ def musicwatch():
             sendmsg(
                 "Please provide a valid link.")
 
-    if text.find("!pmusic") != -1:  # get music from someon else's personal library
+    if text.lower().find("!pmusic") != -1:  # get music from someon else's personal library
         try:
             name1 = text.split()[4]
             if name1 not in pmusic:
@@ -625,7 +625,7 @@ def musicwatch():
             sendmsg(video_title + " | " +
                     link)
 
-    if text.find("!remove") != -1:  # remove a song from the songlist
+    if text.lower().find("!remove") != -1:  # remove a song from the songlist
         if text.find("https://www.youtube.com/watch?v=dQw4w9WgXcQ") != -1:
             sendmsg("I'm sorry " + name +
                     " I'm afraid I can't do that.")
@@ -642,7 +642,7 @@ def musicwatch():
                 sendmsg(
                     "I couldn't remove that song, make sure that you provide the correct link.")
 
-    if text.find("!premove") != -1:  # remove music from your personal library
+    if text.lower().find("!premove") != -1:  # remove music from your personal library
         try:
             song = text.split()[4]
             pmusic[name].remove(song)
@@ -656,11 +656,11 @@ def musicwatch():
             sendmsg(
                 "I couldn't remove that song, make sure that you provide the correct link.")
 
-    if text.find("!songcount") != -1:  # amount of songs in the global library
+    if text.lower().find("!songcount") != -1:  # amount of songs in the global library
         sendmsg("I currently have " + str(songcount) +
                 " songs in my music library.")
 
-    if text.find("!psongcount") != -1:
+    if text.lower().find("!psongcount") != -1:
         try:
             psongcount = len(pmusic[name])
             sendmsg("I currently have " + str(psongcount) +
@@ -668,8 +668,8 @@ def musicwatch():
         except:
             sendmsg("I couldn't find any music in your personal library.")
 
-    if text.lower().find(botnick.lower()) != -1 and text.lower().find("music") != -1 or text.find("!music") != -1:  # give music out of the music list
-        if "add" in text:
+    if text.lower().find(botnick.lower()) != -1 and text.lower().find("music") != -1 or text.lower().find("!music") != -1:  # give music out of the music list
+        if "add" in text.lower():
             sendmsg(
                 "The correct command to add music to the music list is '!add <music-url>'")
         link = random.choice(array)
@@ -678,9 +678,9 @@ def musicwatch():
             "//span[@id='eow-title']/@title"))
         sendmsg(video_title + " | " + link)
 
-    if text.find("!youtube") != -1 or text.find("!yt") != -1 or text.find("!video") != -1 or text.find("!y ") != -1:  # searches youtube
+    if text.lower().find("!youtube") != -1 or text.lower().find("!yt") != -1 or text.lower().find("!video") != -1 or text.lower().find("!y ") != -1:  # searches youtube
         try:
-            string = text[text.find("!y"):]
+            string = text[text.lower().rfind("!y"):]
             search = string[string.find(" ") + 1:].rstrip("\n")
             result_list = []
             # search_list = text.split()[4:]
@@ -726,8 +726,8 @@ def wikiwatch():
     Search wikipedia
     """
     try:
-        if text.find("!wiki") != -1 or text.find("!wikipedia") != -1 or text.find("!w ") != -1:
-            string = text[text.find("!w"):]
+        if text.lower().find("!wiki") != -1 or text.lower().find("!wikipedia") != -1 or text.lower().find("!w ") != -1:
+            string = text[text.lower().rfind("!w"):]
             search = string[string.find(" ") + 1:].rstrip("\n")
             search_list = text.split()[4:]
             # search = " ".join(search_list)
@@ -764,8 +764,8 @@ def googlewatch():
     This function searches google or google images for a given query.
     """
     try:
-        if text.find("!google") != -1 or text.find("!g ") != -1:  # search google
-            string = text[text.find("!g"):]
+        if text.lower().find("!google") != -1 or text.lower().find("!g ") != -1:  # search google
+            string = text[text.lower().rfind("!g"):]
             search = string[string.find(" ") + 1:].rstrip("\n")
             search_list = text.split()[4:]
             # search = " ".join(search_list)
@@ -784,7 +784,7 @@ def googlewatch():
     except:
         sendmsg(error)
 
-    if "!image" in text or "!img" in text or "!i " in text:
+    if "!image" in text.lower() or "!img" in text.lower() or "!i " in text.lower():
         # With help of:
         # https://github.com/creeveshft/Web_Scraping/blob/master/Google%20Image%20Searcher/getimage.py
         url_list = []
@@ -794,7 +794,7 @@ def googlewatch():
 
         sentence = text.split()
 
-        string = text[text.find("!i"):]
+        string = text[text.lower().rfind("!i"):]
 
         for word in sentence:
             if word[1].isdigit and word[0] == "x":
@@ -828,8 +828,8 @@ def googlewatch():
             # print(i)
             i = str(i)
             # if "imgres?imgurl" in i:
-            #start = i.find("imgres?imgurl") + len("imgres?imgurl")
-            #end = i.find("jsaction",start)
+            # start = i.find("imgres?imgurl") + len("imgres?imgurl")
+            # end = i.find("jsaction",start)
             # url_list.append(i[start:end])
             if "src=" in i:
                 start = i.find("src=") + 5
@@ -916,7 +916,7 @@ def dicewatch():  # !roll 5d10
     this function rolls dice
     """
     name = text.split("!")[0].strip(":")
-    if "!roll" in text:
+    if "!roll" in text.lower():
         try:
             roll_list = []
             roll_list_int = []
@@ -952,7 +952,7 @@ def overridewatch():
     Makes the bot only listen to Cha0zz
     """
     name = text.split("!")[0].strip(":")
-    if ":!override" in text and text.find("Cha0zz@Cha0zz.user.gamesurge") != -1:
+    if ":!override" in text.lower() and text.find("Cha0zz@Cha0zz.user.gamesurge") != -1:
         global override
         if override is True:
             override = False
@@ -960,11 +960,8 @@ def overridewatch():
         else:
             override = True
 
-
+"""
 def REKT():
-    """
-    Rekt stuff
-    """
     map_list = ["http://i.imgur.com/eupMU6w.png",
                 "http://i.imgur.com/UXsCSEh.jpg"]
     if "!map" in text:
@@ -978,10 +975,11 @@ def REKT():
                 sendmsg("I currently only have mission maps.")
         except:
             sendmsg(error)
+"""
 
 
 def pm():
-    if "!pm" in text and "!pmusic" not in text:
+    if "!pm" in text.lower() and "!pmusic" not in text.lower():
         name = text.split()[4]
         msg = " ".join(text.split()[5:])
         sendpm(name, msg)
@@ -991,9 +989,9 @@ def weather():
     """
     get weather and stuff
     """
-    if text.find("!weather") != -1:  # gets the weather for a given location
+    if text.lower().find("!weather") != -1:  # gets the weather for a given location
         try:
-            string = text[text.find("!w"):]
+            string = text[text.lower().rfind("!w"):]
             location = string[string.find(" ") + 1:].rstrip("\n")
             # location = " ".join(text.split()[4:])
             lookup = pywapi.get_location_ids(location)
@@ -1015,7 +1013,7 @@ def weather():
         except:
             sendmsg(error)
 
-    if text.find("!moon") != -1:  # gets the current moonphase
+    if text.lower().find("!moon") != -1:  # gets the current moonphase
         try:
             location = "new york"
             lookup = pywapi.get_location_ids(location)
@@ -1065,9 +1063,9 @@ def urban2():
     """
     lookup stuff in the urban dictionary, now without library.
     """
-    if "!urban" in text or "!u " in text:
+    if "!urban" in text.lower() or "!u " in text.lower():
         try:
-            string = text[text.find("!u"):]
+            string = text[text.lower().rfind("!u"):]
             search = string[string.find(" ") + 1:].rstrip("\n")
             name = text.split("!")[0].strip(":")
             # search = " ".join(text.split()[4:])
@@ -1096,10 +1094,12 @@ def lookup():
     """
     Look stuff up in a dictionary
     """
-    if text.find("!dict") != -1 or text.find("!define") != -1 or text.find("!d ") != -1:
+    if text.lower().find("!dict") != -1 or text.lower().find("!define") != -1 or text.lower().find("!d ") != -1:
         try:
-            string = text[text.find("!d"):]
+            string = text[text.lower().rfind("!d"):]
+            print(string)
             search = string[string.find(" ") + 1:].rstrip("\n")
+            print(search)
             # search = " ".join(text.split()[4:])
             search_query = urllib.urlencode({'term': search})
             url = "http://www.dictionary.com/cgi-bin/dict.pl?" + search_query
@@ -1126,7 +1126,7 @@ def lookup():
 def translate(language1="", language2="", sentence=""):
     # https://glosbe.com/a-api
     if language1 == "" or language2 == "" or sentence == "":
-        line = text[text.find("!t"):]
+        line = text[text.lower().rfind("!t"):]
         line_list = line.split(" ")
         language1 = line_list[0]
         language2 = line_list[1]
@@ -1168,10 +1168,10 @@ def bot():
                 irc.send('PONG ' + text.split()
                          [1] + '\r\n')
 
-            if not "GameSurge" in text:
-                #text = string.rstrip(text)
-                #text = string.split(text)
-                #text = " ".join(text)
+            if "GameSurge" not in text:
+                # text = string.rstrip(text)
+                # text = string.split(text)
+                # text = " ".join(text)
 
                 print(text)
 
@@ -1195,8 +1195,8 @@ def bot():
                     # urban()
                     urban2()
                     lookup()
-                    #if text.find("!t ") != -1:
-                        #translate()
+                    # if text.find("!t ") != -1:
+                    # translate()
                 wakewatch()
                 quitwatch()
                 overridewatch()
