@@ -78,8 +78,10 @@ commands = ["!nick", "!quit", "!help", "!join", "!leave", "!sleep", "!wake", "!w
             "!update", "!corn_on", "!corn_off", "!countdown", "!sing", "!music", "!add", "!remove", "!songcount", "!psongcount", "!youtube", "!wiki", "!google", "!padd", "!premove", "!pmusic", "!image", "!roll", "!plist", "!moon", "!weather",
             "!urban", "!dict", "!identify"]  # list of available commands
 
-greetings = ["Hi", "Hello", "Hey", "Greetings",
-             "Heyaa", "Howdy", "Aloha", "Hola", "Bonjour", "Ciao"]  # list of greetings
+greetings = ["hi", "hello", "hey", "greetings",
+             "heyaa", "howdy", "aloha", "hola", "bonjour"]  # list of greetings
+
+goodnight = ["night", "goodnight", "ciao"]
 
 sentences = ["You talkin' to me?", "You talkin' 'bout me?",
              "\001ACTION rustles his jimmies. \001"]  # list of random sentences
@@ -91,7 +93,7 @@ refuse = ["NO", "Never", "Do it yourself.",
 blacklist = ["corn", "flakes", "fett"]
 
 # list used to identify compliments
-compliment = ["good", "smart", "clever"]
+compliment = ["good ", "smart ", "clever"]
 
 suggestions = ["I really like this song", "How about this song",
                "Someone told me that this is a good piece of music"]
@@ -203,18 +205,21 @@ def greetingwatch():
     """
     greetings2 = greetings
     name = text.split("!")[0].strip(":")
-    for i in greetings:
-        if text.lower().find(i.lower() + " " + botnick.lower()) != -1 or text.lower().find(i.lower() + ", " + botnick.lower()) != -1:
-            sendmsg(random.choice(
-                greetings2) + " " + name)
+
+    if any([i in text.lower() for i in greetings]) and botnick.lower() in text.lower():
+        sendmsg(random.choice(greetings + " " + name))
+
+    if any([i in text.lower() for i in goodnight]) and botnick.lower() in text.lower():
+        sendmsg(random.choice(goodnight) + " " + name)
+
     # if text.find("JOIN") !=-1 and text.lower().find(botnick.lower()) == -1 and text.find(":!") == -1:
         # for nick in blacklist:
         #  if text.lower().find(nick) == -1:
-            #    name = text.split("!")[0].strip(":")
-            #     if text.lower().find("slymodi") != -1:
-            #       irc.send("PRIVMSG "+ channel +" :"+ "All hail Sly Mo Di!" +"\n")
-            #    else:
-            #     irc.send("PRIVMSG "+ channel +" :"+ random.choice(greetings2) + " " + name +"\n")
+        #    name = text.split("!")[0].strip(":")
+        #     if text.lower().find("slymodi") != -1:
+        #       irc.send("PRIVMSG "+ channel +" :"+ "All hail Sly Mo Di!" +"\n")
+        #    else:
+        #     irc.send("PRIVMSG "+ channel +" :"+ random.choice(greetings2) + " " + name +"\n")
 
 
 def textwatch():
@@ -253,7 +258,16 @@ def textwatch():
 
     if "tableflip" in text.lower():
         time.sleep(2)
-        sendmsg("┬──┬ ノ( ゜-゜ノ)")
+        if "TABLEFLIP" in text:
+            sendmsg("┬──┬ ノ( ゜-゜ノ)")
+            action("sighs")
+            time.sleep(1)
+            sendmsg("┬──┬ ノ( ゜-゜ノ)")
+        else:
+            sendmsg("┬──┬ ノ( ゜-゜ノ)")
+
+    if "hail satan" in text.lower():
+        sendmsg("All hail the dark lord!! /o/ His victory is certain!! /o/")
 
     if text.lower().find(botnick.lower()) != -1 and text.lower().find("sing") != -1 and text.lower().find("song") != -1 or text.lower().find("!sing") != -1:  # lets the bot sing a song
         sendmsg("It's called Daisy.")
@@ -304,10 +318,13 @@ def textwatch():
         sendmsg("\001ACTION" + " brings " +
                 name1.replace("me", name) + " " + final_message + "\001")
 
-    if text.lower().find(botnick.lower()) != -1:
-        for i in compliment:
-            if text.lower().find(i) != -1 and name.lower().find(i) == -1:  # response to compliments
-                sendmsg(":D Thanks " + name)
+    if any([i in text.lower() for i in compliment]) and botnick.lower() in text.lower() and any([i not in name.lower() for i in compliment]):
+        sendmsg(":D Thanks " + name)
+
+    # if text.lower().find(botnick.lower()) != -1:
+    #     for i in compliment:
+    #         if text.lower().find(i) != -1 and name.lower().find(i) == -1:  # response to compliments
+    #             sendmsg(":D Thanks " + name)
 
     if text.lower().find(botnick.lower()) != -1 and text.lower().find("countdown") != -1 or text.lower().find("!countdown") != -1:  # final countdown
         sendmsg(
@@ -796,8 +813,11 @@ def googlewatch():
 
         string = text[text.lower().rfind("!i"):]
 
+        regex = re.compile('x\d+')
+
         for word in sentence:
-            if word[1].isdigit and word[0] == "x":
+            # if word[1].isdigit and word[0] == "x":
+            if re.search(regex, word) != None:
                 if len(word) > int(max_amount) + 1 or int(word[1]) > int(max_amount):
                     amount = 3
                     sendmsg(
