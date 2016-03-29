@@ -77,7 +77,7 @@
 - \<botname> + tell + \<person> + \<message>: The bot will tell the person the message
 - \<botname> + give/ fetch/ bring + \<person> + \<message>: The bot will give/ fetch/ bring the person what's in the message
 - compliment + \<botname>: The bot will thank you
-- \<botname> + make + <message>: The bot will make you the message
+- \<botname> + make + \<message>: The bot will make you the message
   - try sudo
 - Who is + \<botname>: The bot will tell you who he is
   - Who are you + \<botname>
@@ -91,3 +91,9 @@
 - Jimmy + What is your nick: The bot will reveal his current nickname
 - \<botname> + what + answer: The bot will answer your question
 - idiot
+
+# <!-- TODO:  -->
+- [ ] Finish the translate function
+- [ ] Make a unit-conversion function
+- [ ] Move stuff to an external .config file
+- [ ] Fix bugs
