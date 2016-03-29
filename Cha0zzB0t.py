@@ -78,10 +78,10 @@ commands = ["!nick", "!quit", "!help", "!join", "!leave", "!sleep", "!wake", "!w
             "!update", "!corn_on", "!corn_off", "!countdown", "!sing", "!music", "!add", "!remove", "!songcount", "!psongcount", "!youtube", "!wiki", "!google", "!padd", "!premove", "!pmusic", "!image", "!roll", "!plist", "!moon", "!weather",
             "!urban", "!dict", "!identify"]  # list of available commands
 
-greetings = ["hi", "hello", "hey", "greetings",
-             "heyaa", "howdy", "aloha", "hola", "bonjour"]  # list of greetings
+greetings = ["hi ", "hello ", "hey ", "greetings ",
+             "heyaa ", "howdy ", "aloha ", "hola ", "bonjour "]  # list of greetings
 
-goodnight = ["night", "goodnight", "ciao"]
+goodnight = ["night ", "goodnight ", "ciao "]
 
 sentences = ["You talkin' to me?", "You talkin' 'bout me?",
              "\001ACTION rustles his jimmies. \001"]  # list of random sentences
@@ -207,10 +207,10 @@ def greetingwatch():
     name = text.split("!")[0].strip(":")
 
     if any([i in text.lower() for i in greetings]) and botnick.lower() in text.lower():
-        sendmsg(random.choice(greetings + " " + name))
+        sendmsg(random.choice(greetings) + name)
 
     if any([i in text.lower() for i in goodnight]) and botnick.lower() in text.lower():
-        sendmsg(random.choice(goodnight) + " " + name)
+        sendmsg(random.choice(goodnight) + name)
 
     # if text.find("JOIN") !=-1 and text.lower().find(botnick.lower()) == -1 and text.find(":!") == -1:
         # for nick in blacklist:
@@ -249,7 +249,7 @@ def textwatch():
             if cheercount == 4:
                 cheercount = 0
 
-        if text.lower().find("all hail") != -1:  # respond to hailing
+        if text.lower().find("all hail") != -1 and text.lower().find("satan") == -1:  # respond to hailing
             if hailcount < 1:
                 sendmsg("All hail! /o/")
             hailcount += 1
@@ -265,6 +265,13 @@ def textwatch():
             sendmsg("┬──┬ ノ( ゜-゜ノ)")
         else:
             sendmsg("┬──┬ ノ( ゜-゜ノ)")
+
+    if botnick.lower() in text.lower() and "summon" in text.lower():
+        name_list = text.lower().split()
+        loc = name_list.index("summon") + 1
+        name = " ".join(name_list[loc:])  # 5
+        sendmsg("Ph'nglui mglw'nafh " + name +
+                " R'lyeh wgah'nagl fhtagn!")
 
     if "hail satan" in text.lower():
         sendmsg("All hail the dark lord!! /o/ His victory is certain!! /o/")
@@ -295,7 +302,7 @@ def textwatch():
         message_list = text.split()[6:]
         message = " ".join(message_list)
         final_message = message.replace(
-            "me ", name)
+            " me ", name)
         sendmsg("\001ACTION" + " gives " + name1.replace("me",
                                                          name) + " " + final_message + "\001")
 
@@ -546,7 +553,7 @@ def helpwatch():
             sendmsg(
                 "For info about a specific command use '!help <command>' (without the '!' infront of the command)")
 
-    elif botnick.lower() in text.lower() and ("help " in text.lower() or " help" in text.lower()):
+    elif botnick.lower() in text.lower() and ("help " in text.lower() or " help" in text.lower()) and "helpful" not in text.lower():
         sendmsg(
             "The available commands are " + commands_str)
         sendmsg("for info about a specific command use '!help <command>'")
@@ -557,7 +564,7 @@ def quitwatch():
     This function lets the bot leave the IRC stream
     """
     name = text.split("!")[0].strip(":")
-    if "!quit" in text.lower() and ("Cha0zz@Cha0zz.user.gamesurge" in text or "Cha0zz@gamesurge" in text):
+    if ("!quit" in text.lower() or "!dick" in text.lower()) and ("Cha0zz@Cha0zz.user.gamesurge" in text or "Cha0zz@gamesurge" in text):
         sendmsg("I'm going, ciao.")
         irc.send("QUIT" + "\n")
     elif "!quit" in text.lower() and text.find("Cha0zz@Cha0zz.user.gamesurge") == -1:
@@ -1063,21 +1070,6 @@ def weather():
         except:
             sendmsg(error)
 
-"""
-def urban():
-    if text.find("!urban") != -1:
-        try:
-            search = " ".join(text.split()[4:])
-            result = urbandict.define(search)
-            definition = str(result[0]['def']).replace(
-                "\n", " ").lstrip(" ")
-            if len(definition) > 430:
-                definition = definition[0:430] + "..."
-            sendmsg(definition)
-        except:
-            sendmsg(error)
-"""
-
 
 def urban2():
     """
@@ -1127,7 +1119,7 @@ def lookup():
             start = int(response.find(
                 '<div class="def-content">')) + 25
             end = int(response.find("</div>", start))
-            definition = response[start:end].replace("\n", "")
+            definition = response[start:end].replace('\n', "").lstrip()
             definition = re.sub('\<.*?\>', '', definition)
             if len(definition) > 430:
                 definition = definition[0:430] + "..."
@@ -1137,8 +1129,11 @@ def lookup():
                 if response.find("there's not a match on Dictionary.com.") != -1:
                     sendmsg("I couldn't find the requested word(s).")
                 else:
+                    channel = text.split()[2]
+                    print(channel)
+                    print(definition)
                     sendmsg("This is what I could find | " + url)
-                    sendmsg(definition)
+                    sendmsg(definition, channel)
         except:
             sendmsg(error)
 
@@ -1167,6 +1162,13 @@ def translate(language1="", language2="", sentence=""):
 
     sendmsg(translation)
     sendmsg(meaning)
+
+
+def convert():
+    """
+    Convert inbetween metric and imperial units
+    """
+    pass
 
 
 def bot():
@@ -1245,7 +1247,7 @@ while 1:
             changenick(nick)
         elif "/pm" in user_text:
             nick = user_text.split()[1]
-            msg = user_text.split()[2:]
+            msg = user_text.split()[2:].lstrip()
             sendpm(nick, msg)
         else:
             sendmsg(user_text, channel)
