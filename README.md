@@ -91,4 +91,3 @@
 - Jimmy + What is your nick: The bot will reveal his current nickname
 - \<botname> + what + answer: The bot will answer your question
 - idiot
--
