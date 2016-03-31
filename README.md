@@ -63,6 +63,7 @@
 - !bed: The bot will tell you to go back to bed
 - !pudding
 - !pm \<person> \<message>:The bot will pm the message to the person
+- !time \<user>: The bot will fetch the local time of the user
 
 ## Reactions
 - hi, hello, ... + \<botname>: The bot will answer to your greeting
@@ -93,6 +94,7 @@
 - idiot
 
 # <!-- TODO:  -->
+- [ ] Move over to python 3.x
 - [ ] Finish the translate function
 - [ ] Make a unit-conversion function
 - [ ] Move stuff to an external .config file

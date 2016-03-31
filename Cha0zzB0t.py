@@ -55,6 +55,7 @@ cheercount = 0
 hailcount = 0
 wavecount = 0
 readbuffer = ""
+channel_req =""
 
 
 error = "Something went wrong."
@@ -76,7 +77,7 @@ nopelist = ["KungCheops"]
 
 commands = ["!nick", "!quit", "!help", "!join", "!leave", "!sleep", "!wake", "!work", "!bed", "!choose", "!no",
             "!update", "!corn_on", "!corn_off", "!countdown", "!sing", "!music", "!add", "!remove", "!songcount", "!psongcount", "!youtube", "!wiki", "!google", "!padd", "!premove", "!pmusic", "!image", "!roll", "!plist", "!moon", "!weather",
-            "!urban", "!dict", "!identify"]  # list of available commands
+            "!urban", "!dict", "!identify", "!time"]  # list of available commands
 
 greetings = ["hi ", "hello ", "hey ", "greetings ",
              "heyaa ", "howdy ", "aloha ", "hola ", "bonjour "]  # list of greetings
@@ -129,6 +130,8 @@ def action(msg, channel=""):
         channel = text.split()[2]
     sendmsg("\001ACTION " + msg + "\001", channel)
 
+def ptime(user):
+    sendpm(user, "\001TIME\001")
 
 def sendpm(name, msg):
     """
@@ -230,6 +233,7 @@ def textwatch():
     global cheercount
     global hailcount
     global wavecount
+    global channel_req
     if corn_mode is False:
         # responding to waving
         if text.find("o/") != -1 and text.find("\o/") == -1 and text.find("/o/") == -1:
@@ -455,6 +459,17 @@ def textwatch():
     if text.lower().find("what is the meaning of life") != -1 or text.lower().find("what's the meaning of life") != -1:
         sendmsg("42")
 
+    if "!time" in text.lower():
+        try:
+            channel_req = text.split()[2]
+            ptime(text.split()[4])
+        except:
+            sendmsg(error)
+
+    if "TIME" in text and "NOTICE" in text:
+        time = text[text.find("TIME")+4:]
+        sendmsg(time[:-2].lstrip(" "), channel_req)
+
 
 def helpwatch():
     """
@@ -547,6 +562,8 @@ def helpwatch():
                 "Searches a dictionairy for a definition | !dict <query>")
         elif "identify" in text.lower():
             sendmsg("Gives information about the bot.")
+        elif "time" in text.lower():
+            sendmsg("Gives you the local time of a specific user | !time <user>")
         else:
             sendmsg(
                 "The available commands are " + commands_str)
@@ -811,67 +828,71 @@ def googlewatch():
     if "!image" in text.lower() or "!img" in text.lower() or "!i " in text.lower():
         # With help of:
         # https://github.com/creeveshft/Web_Scraping/blob/master/Google%20Image%20Searcher/getimage.py
-        url_list = []
-        answer_list = []
-        max_amount = "3"
-        k = 0
+        try:
+            url_list = []
+            answer_list = []
+            max_amount = "3"
+            k = 0
 
-        sentence = text.split()
+            sentence = text.split()
 
-        string = text[text.lower().rfind("!i"):]
+            string = text[text.lower().rfind("!i"):]
 
-        regex = re.compile('x\d+')
+            regex = re.compile('x\d+')
 
-        for word in sentence:
-            # if word[1].isdigit and word[0] == "x":
-            if re.search(regex, word) != None:
-                if len(word) > int(max_amount) + 1 or int(word[1]) > int(max_amount):
-                    amount = 3
-                    sendmsg(
-                        "The maximum amount of allowed images is 3.")
+            for word in sentence:
+                # if word[1].isdigit and word[0] == "x":
+                if re.search(regex, word) != None:
+                    if len(word) > int(max_amount) + 1 or int(word[1]) > int(max_amount):
+                        amount = 3
+                        sendmsg(
+                            "The maximum amount of allowed images is 3.")
+                    else:
+                        amount = int(word[1])
+
+                    string = string.replace(word, "")
                 else:
-                    amount = int(word[1])
+                    amount = 1
 
-                string = string.replace(word, "")
-            else:
-                amount = 1
+            search = string[string.find(" ") + 1:].rstrip("\n")
+            search_query = urllib.urlencode({'q': search})
 
-        search = string[string.find(" ") + 1:].rstrip("\n")
-        search_query = urllib.urlencode({'q': search})
+            browser = mechanize.Browser()
+            browser.set_handle_robots(False)
+            browser.addheaders = [('User-agent', 'Mozilla')]
 
-        browser = mechanize.Browser()
-        browser.set_handle_robots(False)
-        browser.addheaders = [('User-agent', 'Mozilla')]
+            html = browser.open(
+                "https://www.google.com/search?site=imghp&tbm=isch&source=hp&biw=1414&bih=709&" + search_query + "&o" + search_query)
+            # html = urllib.urlopen("https://www.google.com/search?site=imghp&tbm=isch&source=hp&biw=1414&bih=709&q="+search+"&oq="+search).read()
 
-        html = browser.open(
-            "https://www.google.com/search?site=imghp&tbm=isch&source=hp&biw=1414&bih=709&" + search_query + "&o" + search_query)
-        # html = urllib.urlopen("https://www.google.com/search?site=imghp&tbm=isch&source=hp&biw=1414&bih=709&q="+search+"&oq="+search).read()
+            soup = BeautifulSoup(html)
+            # print(soup)
+            results = soup.findAll("a")
+            # print(results)
+            for i in results:
+                # print(i)
+                i = str(i)
+                # if "imgres?imgurl" in i:
+                # start = i.find("imgres?imgurl") + len("imgres?imgurl")
+                # end = i.find("jsaction",start)
+                # url_list.append(i[start:end])
+                if "src=" in i:
+                    start = i.find("src=") + 5
+                    end = i.find("width=") - 2
+                    url_list.append(i[start:end])
 
-        soup = BeautifulSoup(html)
-        # print(soup)
-        results = soup.findAll("a")
-        # print(results)
-        for i in results:
-            # print(i)
-            i = str(i)
-            # if "imgres?imgurl" in i:
-            # start = i.find("imgres?imgurl") + len("imgres?imgurl")
-            # end = i.find("jsaction",start)
-            # url_list.append(i[start:end])
-            if "src=" in i:
-                start = i.find("src=") + 5
-                end = i.find("width=") - 2
-                url_list.append(i[start:end])
+            # print(url_list)
 
-        # print(url_list)
+            while k < amount:
+                answer_list.append(url_list[k])
+                k += 1
 
-        while k < amount:
-            answer_list.append(url_list[k])
-            k += 1
+            answer = " | ".join(answer_list)
 
-        answer = " | ".join(answer_list)
+            sendmsg("This is what I could find | " + answer)
 
-        sendmsg("This is what I could find | " + answer)
+        except:
+            sendmsg(error)
 
     """
     if "!image" in text or "!img" in text or "!i " in text:
@@ -1190,12 +1211,16 @@ def bot():
                 irc.send('PONG ' + text.split()
                          [1] + '\r\n')
 
+            if "TIME" in text:
+                print("succeed1")
+
             if "GameSurge" not in text:
                 # text = string.rstrip(text)
                 # text = string.split(text)
                 # text = " ".join(text)
 
                 print(text)
+
 
                 if connected is False:
                     irc.send("JOIN " + channel + "\r\n")
