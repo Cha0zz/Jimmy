@@ -64,6 +64,7 @@
 - !pudding
 - !pm \<person> \<message>:The bot will pm the message to the person
 - !time \<user>: The bot will fetch the local time of the user
+- !lag \<user>: The bot will take a ping towards the user
 
 ## Reactions
 - hi, hello, ... + \<botname>: The bot will answer to your greeting

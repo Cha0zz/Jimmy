@@ -28,9 +28,8 @@ from urlparse import urlparse
 import hashlib
 import string
 import time
-# from apiclient.discovery import build
-# import urbandict
-# import ast
+import datetime
+
 
 # server = "burstfire.uk.eu.gamesurge.net"
 server = "irc.web.gamesurge.net"  # settings
@@ -49,14 +48,14 @@ irc.send("PRIVMSG nickserv :iNOOPE\r\n")  # auth
 
 connected = False
 sleep = False
-corn_mode = True
+corn_mode = False
 override = False
 cheercount = 0
 hailcount = 0
 wavecount = 0
 readbuffer = ""
 channel_req =""
-
+curr_time=""
 
 error = "Something went wrong."
 
@@ -77,7 +76,7 @@ nopelist = ["KungCheops"]
 
 commands = ["!nick", "!quit", "!help", "!join", "!leave", "!sleep", "!wake", "!work", "!bed", "!choose", "!no",
             "!update", "!corn_on", "!corn_off", "!countdown", "!sing", "!music", "!add", "!remove", "!songcount", "!psongcount", "!youtube", "!wiki", "!google", "!padd", "!premove", "!pmusic", "!image", "!roll", "!plist", "!moon", "!weather",
-            "!urban", "!dict", "!identify", "!time"]  # list of available commands
+            "!urban", "!dict", "!identify", "!time","!lag"]  # list of available commands
 
 greetings = ["hi ", "hello ", "hey ", "greetings ",
              "heyaa ", "howdy ", "aloha ", "hola ", "bonjour "]  # list of greetings
@@ -234,6 +233,7 @@ def textwatch():
     global hailcount
     global wavecount
     global channel_req
+    global curr_time
     if corn_mode is False:
         # responding to waving
         if text.find("o/") != -1 and text.find("\o/") == -1 and text.find("/o/") == -1:
@@ -467,8 +467,21 @@ def textwatch():
             sendmsg(error)
 
     if "TIME" in text and "NOTICE" in text:
-        time = text[text.find("TIME")+4:]
-        sendmsg(time[:-2].lstrip(" "), channel_req)
+        time_p = text[text.find("TIME")+4:]
+        sendmsg(time_p[:-2].lstrip(" "), channel_req)
+
+    if "!lag" in text.lower():
+        try:
+            curr_time = datetime.datetime.now()
+            channel_req = text.split()[2]
+            sendpm(text.split()[4],"\001PING " + str(curr_time)+ "\001" )
+        except:
+            sendmsg(error)
+
+    if "NOTICE" in text and "PING" in text:
+        time_p = datetime.datetime.now()
+        time_diff =  time_p - curr_time
+        sendmsg(str(time_diff.total_seconds())+"s", channel_req)
 
 
 def helpwatch():
@@ -564,6 +577,8 @@ def helpwatch():
             sendmsg("Gives information about the bot.")
         elif "time" in text.lower():
             sendmsg("Gives you the local time of a specific user | !time <user>")
+        elif "lag" in text.lower():
+            sendmsg("Takes a ping towards a specified user | !lag <user>")
         else:
             sendmsg(
                 "The available commands are " + commands_str)
