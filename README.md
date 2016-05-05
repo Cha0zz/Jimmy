@@ -59,6 +59,8 @@
 - !update: The bot will do the update song
   - \<botname> + where + update
 - !work: The bot will tell you to go back to work
+- !mine: The bot will tell you to go back to the mines
+- !break: The bot will tell you to take a break
 - !no: noooooooo
 - !bed: The bot will tell you to go back to bed
 - !pudding
