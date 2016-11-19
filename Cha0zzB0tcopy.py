@@ -11,19 +11,19 @@ This program is an IRC Chatbot created with the help of a tutorial found on: htt
 
 import socket
 import pickle
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 from bs4 import BeautifulSoup
 import re
 import wikipedia
 import random
 import json
-import thread
+import _thread
 import lxml
 from lxml import etree
 import pywapi
 import mechanize
-from urlparse import urlparse
+from urllib.parse import urlparse
 import hashlib
 import string
 import time
@@ -32,13 +32,15 @@ import datetime
 # server = "burstfire.uk.eu.gamesurge.net"
 server = "irc.web.gamesurge.net"  # settings
 channel = "#limittheory"
-botnick = "Jimmy42"
+botnick = "Jimmy43"
 
 # defines the socket
-irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+irc = socket.socket(
+        socket.AF_INET, socket.SOCK_STREAM)
 # connects to the server
 irc.connect((server, 6667))
-irc.send("USER " + botnick + " " + botnick + " " + botnick + " :Jimmy\n")  # user authentication
+irc.send("USER " + botnick + " " + botnick + " " + botnick +
+         " :Jimmy\n")  # user authentication
 irc.send("NICK " + botnick + "\n")  # sets nick
 irc.send("PRIVMSG nickserv :iNOOPE\r\n")  # auth
 
@@ -76,7 +78,7 @@ commands = ["!nick", "!quit", "!help", "!join", "!leave", "!sleep", "!wake", "!w
             "!urban", "!dict", "!identify", "!time", "!lag"]  # list of available commands
 
 greetings = ["hi ", "hello ", "hey ", "greetings ",
-             "heyaa ", "howdy ", "aloha ", "hola ", "bonjour","olè"]  # list of greetings
+             "heyaa ", "howdy ", "aloha ", "hola ", "bonjour "]  # list of greetings
 
 goodnight = ["night ", "goodnight ", "ciao "]
 
@@ -84,7 +86,7 @@ sentences = ["You talkin' to me?", "You talkin' 'bout me?",
              "\001ACTION rustles his jimmies. \001"]  # list of random sentences
 
 refuse = ["NO", "Never", "Do it yourself.",
-          "Lol, no", "I'm sorry Dave, I'm afraid I can't do that."]  # list of refusals
+          "Lol, no"]  # list of refusals
 
 # list of people not to greet when they log in
 blacklist = ["corn", "flakes", "fett"]
@@ -124,7 +126,7 @@ def sendmsg(msg, channel=""):
         irc.send("PRIVMSG " + channel + " :" +
                  msg + "\n")
         # msg.encode('utf-8', 'ignore')
-        print(botnick + ": " + channel + " " + msg)
+        print((botnick + ": " + channel + " " + msg))
     except:
         pass
 
@@ -151,7 +153,7 @@ def sendpm(name, msg):
     :param name: User to who the message will be send
     """
     irc.send("PRIVMSG " + name + " :" + msg + "\n")
-    print(botnick + ": " + name + " " + msg)
+    print((botnick + ": " + name + " " + msg))
 
 
 def sleepwatch():
@@ -296,10 +298,6 @@ def textwatch():
     if "hail satan" in text.lower():
         sendmsg("All hail the dark lord!! /o/ His victory is certain!! /o/")
 
-    if "flowers" in text.lower() and botnick.lower() in text.lower():
-        sendmsg("Thanks, that's just what I'm looking for.")
-        action("offers the flowers to the dark lord")
-
     if text.lower().find(botnick.lower()) != -1 and text.lower().find("sing") != -1 and text.lower().find(
             "song") != -1 or text.lower().find("!sing") != -1:  # lets the bot sing a song
         sendmsg("It's called Daisy.")
@@ -381,13 +379,6 @@ def textwatch():
         sendmsg("\001ACTION cracks whip \001")
         changenick(original_nick)
 
-    if "!break" in text.lower():
-        original_nick = botnick
-        changenick("HungryBalrog")
-        sendmsg("NEED A BREAK?")
-        action("Cracks cookies")
-        changenick(original_nick)
-
     if text.lower().find("thank") != -1 and text.lower().find(botnick.lower()) != -1 and text.lower().find(
             "tell") == -1 and text.lower().find("say") == -1:  # responding to people thanking the bot
         sendmsg("You're welcome " + name)
@@ -431,7 +422,7 @@ def textwatch():
         if text.lower().find("cha0zz") != -1 and text.lower().find("cha0zz!") == -1:
             message_list = ["Cha0zz for he is my master.",
                             "Cha0zz", "My master, Cha0zz"]
-        elif text.lower().find(" or ") == -1:
+        elif text.lower().find(" or") == -1:
             message_list = text.split(",")[1:]
             if text.lower().find(":!choose") == -1:
                 message_list.append(
@@ -440,7 +431,7 @@ def textwatch():
                 message_list.append(
                         text.split()[4].strip(","))
         else:
-            message_list = text.split(" or ")[1:]
+            message_list = text.split(" or")[1:]
             if text.lower().find(":!choose") == -1:
                 message_list.append(
                         text.split()[5])
@@ -453,12 +444,6 @@ def textwatch():
         except:
             sendmsg(
                     'Use "," or "or" to separate the possible choices.')
-
-    if "!blame " in text:
-        string = text[text.lower().rfind("!blame"):]
-        person = string[string.find(" ") + 1:].rstrip("'\r\n'").strip(" ")
-        sendmsg(person + " it's all your fault!")
-        sendpm(person, "I'm sorry, I'm only doing what " + name + " told me.")
 
     if ":!no" in text.lower() or " !no" in text.lower() and text.lower().find("node") == -1:  # NOOOOOOOO
         sendmsg(
@@ -497,9 +482,9 @@ def textwatch():
             "what") != -1:
         sendmsg("That's easy, obviously the answer is 42.")
 
-   # if "!pudding" in text.lower():
-       # pudding_list = ["PUDDING", "pudding", "PuDdInG"]
-       # sendmsg(random.choice(pudding_list))
+    if "!pudding" in text.lower():
+        pudding_list = ["PUDDING", "pudding", "PuDdInG"]
+        sendmsg(random.choice(pudding_list))
 
     if text.lower().find("idiot") != -1:
         sendmsg("Idiots, idiots everywhere.")
@@ -508,21 +493,11 @@ def textwatch():
         sendmsg("42")
 
     if "!time" in text.lower():
-        if "!time #" in text.lower():
-            sendmsg("How about no?")
-        else:
-            try:
-                channel_req = text.split()[2]
-                ptime(text.split()[4])
-            except:
-                sendmsg(error)
-
-    if "!mine" in text:
-        original_nick = botnick
-        changenick("RedHotBalrog")
-        sendmsg("BACK TO THE MINES!")
-        action("Cracks whip")
-        changenick(original_nick)
+        try:
+            channel_req = text.split()[2]
+            ptime(text.split()[4])
+        except:
+            sendmsg(error)
 
     if "TIME" in text and "NOTICE" in text:
         time_p = text[text.find("TIME") + 4:]
@@ -598,7 +573,8 @@ def helpwatch():
         elif "corn_off" in text.lower():
             sendmsg("Disables corn_on mode.")
         elif "youtube" in text.lower():
-            sendmsg("Search youtube for the given query | !youtube <search>")
+            sendmsg(
+                    "Search youtube for the given query | !youtube <search>")
         elif "wiki" in text.lower():
             sendmsg(
                     "Search wikipedia for the given query | !wiki <search>")
@@ -688,7 +664,7 @@ def musicwatch():
                         "I added the song to your personal library " + name)
 
         try:
-            a = urllib.urlopen(song)
+            a = urllib.request.urlopen(song)
             code = a.getcode
             if song in array:
                 sendmsg(
@@ -721,7 +697,7 @@ def musicwatch():
                         "This person doesn't has any music in their personal library.")
 
             link = random.choice(pmusic[name1])
-            youtube = etree.HTML(urllib.urlopen(link).read())
+            youtube = etree.HTML(urllib.request.urlopen(link).read())
             video_title = " ".join(youtube.xpath(
                     "//span[@id='eow-title']/@title"))
             sendmsg(video_title + " | " +
@@ -729,7 +705,7 @@ def musicwatch():
 
         except:
             link = random.choice(pmusic[name])
-            youtube = etree.HTML(urllib.urlopen(link).read())
+            youtube = etree.HTML(urllib.request.urlopen(link).read())
             video_title = " ".join(youtube.xpath(
                     "//span[@id='eow-title']/@title"))
             sendmsg(video_title + " | " +
@@ -784,7 +760,7 @@ def musicwatch():
             sendmsg(
                     "The correct command to add music to the music list is '!add <music-url>'")
         link = random.choice(array)
-        youtube = etree.HTML(urllib.urlopen(link).read())
+        youtube = etree.HTML(urllib.request.urlopen(link).read())
         video_title = " ".join(youtube.xpath(
                 "//span[@id='eow-title']/@title"))
         sendmsg(video_title + " | " + link)
@@ -797,9 +773,9 @@ def musicwatch():
             result_list = []
             # search_list = text.split()[4:]
             # search = " ".join(search_list)
-            search_query = urllib.urlencode({"search_query": search})
+            search_query = urllib.parse.urlencode({"search_query": search})
             url = "http://www.youtube.com/results?" + search_query
-            response = urllib2.urlopen(url)
+            response = urllib.request.urlopen(url)
             html = response.read()
             soup = BeautifulSoup(html)
             for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
@@ -810,7 +786,7 @@ def musicwatch():
                 link = result_list[1]
             else:
                 link = result_list[0]
-            youtube = etree.HTML(urllib.urlopen(link).read())
+            youtube = etree.HTML(urllib.request.urlopen(link).read())
             video_title = " ".join(youtube.xpath(
                     "//span[@id='eow-title']/@title"))
             sendmsg(video_title.encode('utf-8', 'ignore') +
@@ -882,8 +858,8 @@ def googlewatch():
             search = string[string.find(" ") + 1:].rstrip("\n")
             search_list = text.split()[4:]
             # search = " ".join(search_list)
-            search_query = urllib.urlencode({'q': search})
-            response = urllib2.urlopen(
+            search_query = urllib.parse.urlencode({'q': search})
+            response = urllib.request.urlopen(
                     "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&" + search_query).read()
             data = json.loads(response)
             results = data['responseData']['results']
@@ -927,7 +903,7 @@ def googlewatch():
                     amount = 1
 
             search = string[string.find(" ") + 1:].rstrip("\n")
-            search_query = urllib.urlencode({'q': search})
+            search_query = urllib.parse.urlencode({'q': search})
 
             browser = mechanize.Browser()
             browser.set_handle_robots(False)
@@ -1144,25 +1120,23 @@ def weather():
                     location_id)
             moon = weather_com_result[
                 "current_conditions"]["moon_phase"]["text"]
-            if moon.lower() == "new":
-                moon += " | " + "\x031,0" + u"\U0001F311"
-            elif moon.lower() == "new moon":
-                moon += " | " + "\x031,0"+  u"\U0001F311"
+            if moon.lower() == "new moon":
+                moon += " | " + "\U0001F311"
             elif moon.lower() == "waxing crescent":
-                moon += " | " + "\x031,0"+ u"\U0001F312"
+                moon += " | " + "\U0001F312"
             elif moon.lower() == "first quarter":
-                moon += " | " + "\x031,0"+ u"\U0001F313"
+                moon += " | " + "\U0001F313"
             elif moon.lower() == "waxing gibbous":
-                moon += " | " + "\x031,0"+ u"\U0001F314"
+                moon += " | " + "\U0001F314"
             elif moon.lower() == "full moon":
-                moon += " | " + "\x031,0"+ u"\U0001F315"
+                moon += " | " + "\U0001F315"
             elif moon.lower() == "waning gibbous":
-                moon += " | " + "\x031,0"+ u"\U0001F316"
+                moon += " | " + "\U0001F316"
             elif moon.lower() == "last quarter":
-                moon += " | " + "\x031,0"+ u"\U0001F317"
+                moon += " | " + "\U0001F317"
             elif moon.lower() == "waning crescent":
-                moon += " | " + "\x031,0"+ u"\U0001F318"
-            sendmsg(unicode(moon).encode('utf-8', 'ignore'))
+                moon += " | " + "\U0001F318"
+            sendmsg(str(moon).encode('utf-8', 'ignore'))
         except:
             sendmsg(error)
 
@@ -1176,15 +1150,17 @@ def urban2():
             string = text[text.lower().rfind("!u"):]
             search = string[string.find(" ") + 1:].rstrip("\n")
             name = text.split("!")[0].strip(":")
-            search_query = urllib.urlencode({'term': search})
+            # search = " ".join(text.split()[4:])
+            search_query = urllib.parse.urlencode({'term': search})
             url = "http://www.urbandictionary.com/define.php?" + search_query
-            response = urllib.urlopen(url).read().replace(
+            response = urllib.request.urlopen(url).read().replace(
                     "<br/>", " ").replace("\n", "").replace("&gt;", ">")
             start = int(response.find("<div class='meaning'>")
                         ) + len("<div class='meaning'>")
             end = int(response.find("</div>", start))
             definition = " ".join(response[start:end].split())
-            definition = re.sub('\<.*?\>', '', definition).replace("&quot;", "'").replace("&#39;", "'")
+            definition = re.sub(
+                    '\<.*?\>', '', definition).replace("&quot;", "'").replace("&#39;", "'")
             if len(definition) > 430:
                 definition = definition[0:430] + "..."
             # sendmsg("This is what I could find | " + url)
@@ -1207,9 +1183,9 @@ def lookup():
             search = string[string.find(" ") + 1:].rstrip("\n")
             print(search)
             # search = " ".join(text.split()[4:])
-            search_query = urllib.urlencode({'term': search})
+            search_query = urllib.parse.urlencode({'term': search})
             url = "http://www.dictionary.com/cgi-bin/dict.pl?" + search_query
-            response = urllib2.urlopen(url).read()
+            response = urllib.request.urlopen(url).read()
             start = int(response.find(
                     '<div class="def-content">')) + 25
             end = int(response.find("</div>", start))
@@ -1241,14 +1217,14 @@ def translate(language1="", language2="", sentence=""):
         language2 = line_list[1]
         sentence = " ".join(line_list[2:])
 
-    query = urllib.urlencode(
+    query = urllib.parse.urlencode(
             {"from": language1, "dest": language2, "phrase": sentence, "format": "json"})
 
     url = "https://glosbe.com/gapi/translate?" + query
 
     print(url)
 
-    response = urllib2.urlopen(url).read()
+    response = urllib.request.urlopen(url).read()
     data = json.loads(response)
 
     translation = data["tuc"][0]["phrase"]["text"]
@@ -1319,13 +1295,13 @@ def bot():
 
 
 # put the listener/ bot in his own thread
-thread.start_new_thread(bot, ())
+_thread.start_new_thread(bot, ())
 
 while 1:
     """
     Stuff to send messages/ do stuff from the command line.
     """
-    user_text = str(raw_input(""))
+    user_text = str(input(""))
     try:
         if user_text.find("/channel") != -1:
             channel = user_text.split()[1]

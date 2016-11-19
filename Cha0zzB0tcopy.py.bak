@@ -35,10 +35,12 @@ channel = "#limittheory"
 botnick = "Jimmy42"
 
 # defines the socket
-irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+irc = socket.socket(
+        socket.AF_INET, socket.SOCK_STREAM)
 # connects to the server
 irc.connect((server, 6667))
-irc.send("USER " + botnick + " " + botnick + " " + botnick + " :Jimmy\n")  # user authentication
+irc.send("USER " + botnick + " " + botnick + " " + botnick +
+         " :Jimmy\n")  # user authentication
 irc.send("NICK " + botnick + "\n")  # sets nick
 irc.send("PRIVMSG nickserv :iNOOPE\r\n")  # auth
 
@@ -76,7 +78,7 @@ commands = ["!nick", "!quit", "!help", "!join", "!leave", "!sleep", "!wake", "!w
             "!urban", "!dict", "!identify", "!time", "!lag"]  # list of available commands
 
 greetings = ["hi ", "hello ", "hey ", "greetings ",
-             "heyaa ", "howdy ", "aloha ", "hola ", "bonjour","olè"]  # list of greetings
+             "heyaa ", "howdy ", "aloha ", "hola ", "bonjour "]  # list of greetings
 
 goodnight = ["night ", "goodnight ", "ciao "]
 
@@ -84,7 +86,7 @@ sentences = ["You talkin' to me?", "You talkin' 'bout me?",
              "\001ACTION rustles his jimmies. \001"]  # list of random sentences
 
 refuse = ["NO", "Never", "Do it yourself.",
-          "Lol, no", "I'm sorry Dave, I'm afraid I can't do that."]  # list of refusals
+          "Lol, no"]  # list of refusals
 
 # list of people not to greet when they log in
 blacklist = ["corn", "flakes", "fett"]
@@ -296,10 +298,6 @@ def textwatch():
     if "hail satan" in text.lower():
         sendmsg("All hail the dark lord!! /o/ His victory is certain!! /o/")
 
-    if "flowers" in text.lower() and botnick.lower() in text.lower():
-        sendmsg("Thanks, that's just what I'm looking for.")
-        action("offers the flowers to the dark lord")
-
     if text.lower().find(botnick.lower()) != -1 and text.lower().find("sing") != -1 and text.lower().find(
             "song") != -1 or text.lower().find("!sing") != -1:  # lets the bot sing a song
         sendmsg("It's called Daisy.")
@@ -381,13 +379,6 @@ def textwatch():
         sendmsg("\001ACTION cracks whip \001")
         changenick(original_nick)
 
-    if "!break" in text.lower():
-        original_nick = botnick
-        changenick("HungryBalrog")
-        sendmsg("NEED A BREAK?")
-        action("Cracks cookies")
-        changenick(original_nick)
-
     if text.lower().find("thank") != -1 and text.lower().find(botnick.lower()) != -1 and text.lower().find(
             "tell") == -1 and text.lower().find("say") == -1:  # responding to people thanking the bot
         sendmsg("You're welcome " + name)
@@ -431,7 +422,7 @@ def textwatch():
         if text.lower().find("cha0zz") != -1 and text.lower().find("cha0zz!") == -1:
             message_list = ["Cha0zz for he is my master.",
                             "Cha0zz", "My master, Cha0zz"]
-        elif text.lower().find(" or ") == -1:
+        elif text.lower().find(" or") == -1:
             message_list = text.split(",")[1:]
             if text.lower().find(":!choose") == -1:
                 message_list.append(
@@ -440,7 +431,7 @@ def textwatch():
                 message_list.append(
                         text.split()[4].strip(","))
         else:
-            message_list = text.split(" or ")[1:]
+            message_list = text.split(" or")[1:]
             if text.lower().find(":!choose") == -1:
                 message_list.append(
                         text.split()[5])
@@ -453,12 +444,6 @@ def textwatch():
         except:
             sendmsg(
                     'Use "," or "or" to separate the possible choices.')
-
-    if "!blame " in text:
-        string = text[text.lower().rfind("!blame"):]
-        person = string[string.find(" ") + 1:].rstrip("'\r\n'").strip(" ")
-        sendmsg(person + " it's all your fault!")
-        sendpm(person, "I'm sorry, I'm only doing what " + name + " told me.")
 
     if ":!no" in text.lower() or " !no" in text.lower() and text.lower().find("node") == -1:  # NOOOOOOOO
         sendmsg(
@@ -497,9 +482,9 @@ def textwatch():
             "what") != -1:
         sendmsg("That's easy, obviously the answer is 42.")
 
-   # if "!pudding" in text.lower():
-       # pudding_list = ["PUDDING", "pudding", "PuDdInG"]
-       # sendmsg(random.choice(pudding_list))
+    if "!pudding" in text.lower():
+        pudding_list = ["PUDDING", "pudding", "PuDdInG"]
+        sendmsg(random.choice(pudding_list))
 
     if text.lower().find("idiot") != -1:
         sendmsg("Idiots, idiots everywhere.")
@@ -508,21 +493,11 @@ def textwatch():
         sendmsg("42")
 
     if "!time" in text.lower():
-        if "!time #" in text.lower():
-            sendmsg("How about no?")
-        else:
-            try:
-                channel_req = text.split()[2]
-                ptime(text.split()[4])
-            except:
-                sendmsg(error)
-
-    if "!mine" in text:
-        original_nick = botnick
-        changenick("RedHotBalrog")
-        sendmsg("BACK TO THE MINES!")
-        action("Cracks whip")
-        changenick(original_nick)
+        try:
+            channel_req = text.split()[2]
+            ptime(text.split()[4])
+        except:
+            sendmsg(error)
 
     if "TIME" in text and "NOTICE" in text:
         time_p = text[text.find("TIME") + 4:]
@@ -598,7 +573,8 @@ def helpwatch():
         elif "corn_off" in text.lower():
             sendmsg("Disables corn_on mode.")
         elif "youtube" in text.lower():
-            sendmsg("Search youtube for the given query | !youtube <search>")
+            sendmsg(
+                    "Search youtube for the given query | !youtube <search>")
         elif "wiki" in text.lower():
             sendmsg(
                     "Search wikipedia for the given query | !wiki <search>")
@@ -1144,24 +1120,22 @@ def weather():
                     location_id)
             moon = weather_com_result[
                 "current_conditions"]["moon_phase"]["text"]
-            if moon.lower() == "new":
-                moon += " | " + "\x031,0" + u"\U0001F311"
-            elif moon.lower() == "new moon":
-                moon += " | " + "\x031,0"+  u"\U0001F311"
+            if moon.lower() == "new moon":
+                moon += " | " + u"\U0001F311"
             elif moon.lower() == "waxing crescent":
-                moon += " | " + "\x031,0"+ u"\U0001F312"
+                moon += " | " + u"\U0001F312"
             elif moon.lower() == "first quarter":
-                moon += " | " + "\x031,0"+ u"\U0001F313"
+                moon += " | " + u"\U0001F313"
             elif moon.lower() == "waxing gibbous":
-                moon += " | " + "\x031,0"+ u"\U0001F314"
+                moon += " | " + u"\U0001F314"
             elif moon.lower() == "full moon":
-                moon += " | " + "\x031,0"+ u"\U0001F315"
+                moon += " | " + u"\U0001F315"
             elif moon.lower() == "waning gibbous":
-                moon += " | " + "\x031,0"+ u"\U0001F316"
+                moon += " | " + u"\U0001F316"
             elif moon.lower() == "last quarter":
-                moon += " | " + "\x031,0"+ u"\U0001F317"
+                moon += " | " + u"\U0001F317"
             elif moon.lower() == "waning crescent":
-                moon += " | " + "\x031,0"+ u"\U0001F318"
+                moon += " | " + u"\U0001F318"
             sendmsg(unicode(moon).encode('utf-8', 'ignore'))
         except:
             sendmsg(error)
@@ -1176,6 +1150,7 @@ def urban2():
             string = text[text.lower().rfind("!u"):]
             search = string[string.find(" ") + 1:].rstrip("\n")
             name = text.split("!")[0].strip(":")
+            # search = " ".join(text.split()[4:])
             search_query = urllib.urlencode({'term': search})
             url = "http://www.urbandictionary.com/define.php?" + search_query
             response = urllib.urlopen(url).read().replace(
@@ -1184,7 +1159,8 @@ def urban2():
                         ) + len("<div class='meaning'>")
             end = int(response.find("</div>", start))
             definition = " ".join(response[start:end].split())
-            definition = re.sub('\<.*?\>', '', definition).replace("&quot;", "'").replace("&#39;", "'")
+            definition = re.sub(
+                    '\<.*?\>', '', definition).replace("&quot;", "'").replace("&#39;", "'")
             if len(definition) > 430:
                 definition = definition[0:430] + "..."
             # sendmsg("This is what I could find | " + url)
